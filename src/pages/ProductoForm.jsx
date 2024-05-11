@@ -102,7 +102,7 @@ const ProductoForm = () => {
   };
 
   return (
-    <Container maxWidth="md" className="flex justify-center items-center h-screen bg-gray-100">
+    <Container maxWidth="md" className="flex justify-center items-center h-screen bg-blue-100">
       <form onSubmit={handleSubmit} className="w-full max-w-lg bg-white p-8 rounded-lg shadow-lg">
         <Typography variant="h4" align="center" gutterBottom>
           {params.id ? "Actualizar Producto" : "Crear Producto"}
@@ -180,6 +180,9 @@ const ProductoForm = () => {
               tiempoPreparacionError ||
               precioError
             }
+            
+            
+  
             className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded disabled:opacity-50"
           >
             {loading ? "Cargando..." : "Guardar"}

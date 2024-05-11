@@ -27,12 +27,7 @@ export default function TitlebarBelowImageList() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', backgroundColor: 'red', padding: '16px' }}>
-      <Button component={Link} to="/PedidoNuevo" variant="contained" style={{ marginBottom: '16px' }}>
-        Pedido Nuevo
-      </Button>
-      <Button component={Link} to="/ProductoForm" variant="contained" style={{ marginBottom: '16px' }}>
-        Crear Productos
-      </Button>
+      
       <ImageList style={{ width: '100%', maxWidth: 500 }}>
         {productos.map((producto) => (
           <ImageListItem key={producto.id}>

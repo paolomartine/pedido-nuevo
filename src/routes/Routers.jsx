@@ -6,6 +6,7 @@ import {Routes, Route}from 'react-router-dom'
 import Producto from '../pages/Producto'
 import MesaForm from '../pages/MesaForm'
 import ProductoForm from '../pages/ProductoForm'
+import ClienteForm from '../pages/ClienteForm'
 
 const Routers = () => {
   return <Routes>
@@ -16,6 +17,7 @@ const Routers = () => {
     <Route path="/productos"element={<Producto/>}/>    
     <Route path="/productoform"element={<ProductoForm/>}/>
     <Route path="/mesaform"element={<MesaForm/>}/>
+    <Route path="/clienteform"element={<ClienteForm/>}/>
   </Routes>
   
 }

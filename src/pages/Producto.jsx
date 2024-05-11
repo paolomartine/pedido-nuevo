@@ -29,14 +29,14 @@ function Producto() {
     }
   };
 
-  const handleAgregarPedido = async (idProducto, cantidad) => {
+  const handleAgregarPedido = async (idPedido, idProducto, cantidad) => {
     try {
       const response = await fetch(`${API_BASE_URL}/api/v1/detallepedidos`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ id_pedido: 1, id_producto: idProducto, cantidad: cantidad }),
+        body: JSON.stringify({ id_pedido: idPedido, id_producto: idProducto, cantidad: cantidad }),
       });
 
       if (!response.ok) {
@@ -45,8 +45,8 @@ function Producto() {
 
       // Aquí podrías realizar cualquier acción adicional si es necesario, como mostrar un mensaje de éxito.
 
-      setDetallePedidos([...detallePedidos, { idProducto, cantidad }]);
-      setDetallePedido({ idProducto: null, cantidad: 0 });
+      setDetallePedidos([...detallePedidos, { idPedido, idProducto, cantidad }]);
+      setDetallePedido({ idPedido: null, idProducto: null, cantidad: 0 });
     } catch (error) {
       console.error('Error: ', error);
     }
@@ -67,6 +67,24 @@ function Producto() {
     <div className="productos-container" style={{ backgroundColor: 'red', padding: '16px' }}>
       <div className="pedido-container">
         <h2>Pedido Actual</h2>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Producto</th>
+              <th>Cantidad</th>
+            </tr>
+          </thead>
+          <tbody>
+            {detallePedidos.map((detalle, index) => (
+              <tr key={index}>
+                <td>{detalle.idProducto}</td>
+                <td>{detalle.cantidad}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+
         <ul>
           {detallePedidos.map((detalle, index) => (
             <li key={index}>{`Producto ID: ${detalle.idProducto}, Cantidad: ${detalle.cantidad}`}</li>
@@ -75,7 +93,7 @@ function Producto() {
         <Button onClick={handleTerminarPedido} variant="contained" style={{ marginBottom: '16px' }}>Terminar Pedido</Button>
 
 
-        <Button onClick={handleCancelarPedido}variant="contained" style={{ marginBottom: '16px' }}>Cancelar Pedido</Button>
+        <Button onClick={handleCancelarPedido} variant="contained" style={{ marginBottom: '16px' }}>Cancelar Pedido</Button>
       </div>
       {data.length > 0 ? (
         data.map((producto) => (
