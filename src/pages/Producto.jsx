@@ -3,6 +3,7 @@ import './Producto.css';
 import DropdownNumerosMayoresACero from './DropdownNumerosMayoresACero';
 import { Link } from 'react-router-dom';
 import { Navigate } from 'react-router-dom';
+import Button from '@mui/material/Button';
 
 const API_BASE_URL = 'http://localhost:8085';
 
@@ -54,6 +55,11 @@ function Producto() {
   const handleTerminarPedido = () => {
     // Aquí podrías realizar cualquier acción adicional antes de redirigir, como enviar los detalles del pedido a la página de menú.
     // Luego, rediriges a la página de menú.
+    Navigate('/pedido');
+  };
+  const handleCancelarPedido = () => {
+    // Aquí podrías realizar cualquier acción adicional antes de redirigir, como enviar los detalles del pedido a la página de menú.
+    // Luego, rediriges a la página de menú.
     Navigate('/menu');
   };
 
@@ -66,7 +72,10 @@ function Producto() {
             <li key={index}>{`Producto ID: ${detalle.idProducto}, Cantidad: ${detalle.cantidad}`}</li>
           ))}
         </ul>
-        <button onClick={handleTerminarPedido}>Terminar Pedido</button>
+        <Button onClick={handleTerminarPedido} variant="contained" style={{ marginBottom: '16px' }}>Terminar Pedido</Button>
+
+
+        <Button onClick={handleCancelarPedido}variant="contained" style={{ marginBottom: '16px' }}>Cancelar Pedido</Button>
       </div>
       {data.length > 0 ? (
         data.map((producto) => (

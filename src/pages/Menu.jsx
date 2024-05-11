@@ -30,8 +30,8 @@ export default function TitlebarBelowImageList() {
       <Button component={Link} to="/PedidoNuevo" variant="contained" style={{ marginBottom: '16px' }}>
         Pedido Nuevo
       </Button>
-      <Button component={Link} to="/Productos" variant="contained" style={{ marginBottom: '16px' }}>
-        Productos
+      <Button component={Link} to="/ProductoForm" variant="contained" style={{ marginBottom: '16px' }}>
+        Crear Productos
       </Button>
       <ImageList style={{ width: '100%', maxWidth: 500 }}>
         {productos.map((producto) => (
