@@ -85,11 +85,11 @@ function Producto() {
           </tbody>
         </table>
 
-        <ul>
+        {<ul>
           {detallePedidos.map((detalle, index) => (
             <li key={index}>{`Producto ID: ${detalle.idProducto}, Cantidad: ${detalle.cantidad}`}</li>
           ))}
-        </ul>
+        </ul>}
         <Button onClick={handleTerminarPedido} variant="contained" style={{ marginBottom: '16px' }}>Terminar Pedido</Button>
 
 
@@ -102,12 +102,16 @@ function Producto() {
               <img src={producto.url} alt={producto.nombre} style={{ maxWidth: '100%', height: 'auto' }} />
             </div>
             <div className="producto-details">
+              
               <p className="producto-nombre" style={{ fontWeight: 'bold' }}>Nombre: {producto.nombre}</p>
               <p>Tiempo de preparación: {producto.tiempoPreparacion}</p>
               <p>Precio: {producto.precio}</p>
               <p>Ingredientes: {producto.ingredientes}</p>
               <DropdownNumerosMayoresACero numeros={[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]} onChange={(cantidad) => setDetallePedido({ ...detallePedido, cantidad })} />
-              <button onClick={() => handleAgregarPedido(producto.id, detallePedido.cantidad)}>Agregar al pedido</button>
+              
+              <button onClick={() => handleAgregarPedido(detallePedido.idPedido, detallePedido.id_producto, detallePedido.cantidad )}>Agregar al pedido</button>
+            
+            
             </div>
           </div>
         ))
