@@ -1,4 +1,4 @@
-import { Box, AppBar, Container, Toolbar, Typography,  } from '@mui/material'
+import { Box, AppBar, Container, Toolbar, Typography, } from '@mui/material'
 import React from 'react'
 import mylogo from './logoempacadora.png';
 import Button from '@mui/material/Button';
@@ -20,6 +20,9 @@ const Header = ({ brand }) => {
 
         <Button component={Link} to="/ProductoForm" variant="contained" style={{ marginBottom: '16px' }}>
           Crear Productos
+        </Button>
+        <Button component={Link} to="/EditarProducto" variant="contained" style={{ marginBottom: '16px' }}>
+          Actualizar Productos
         </Button>
       </Container>
 

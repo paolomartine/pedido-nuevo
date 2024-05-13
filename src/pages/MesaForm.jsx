@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
+import Button from "@mui/material/Button";
 
 const MesaForm = () => {
   const [mesa, setMesa] = useState({
@@ -53,7 +54,7 @@ const MesaForm = () => {
   };
 
   return (
-    <Container maxWidth="md" className="flex justify-center items-center h-screen bg-gray-100">
+    <Container maxWidth="md" style={{ backgroundColor: 'red' }} className="flex justify-center items-center h-screen">
       <form onSubmit={handleSubmit} className="w-full max-w-lg bg-white p-8 rounded-lg shadow-lg">
         <Typography variant="h4" align="center" gutterBottom>
           {params.id ? "Actualizar Mesa" : "Ingresar Mesa"}
@@ -84,15 +85,16 @@ const MesaForm = () => {
             value={mesa.disponibilidad}
           />
         </div>
-        <button
+        <Button
           type="submit"
-          className={`bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ${
-            loading ? "opacity-50 cursor-not-allowed" : ""
-          }`}
+          variant="contained"
+          color="primary"
           disabled={loading}
+          className="w-full"
+          sx={{ mt: 2 }}
         >
           {loading ? "Enviando..." : "Guardar"}
-        </button>
+        </Button>
       </form>
     </Container>
   );
