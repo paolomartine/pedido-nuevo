@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
+import "bootstrap/dist/css/bootstrap.min.css";
 
 const MesaForm = () => {
   const [mesa, setMesa] = useState({

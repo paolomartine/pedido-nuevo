@@ -15,15 +15,16 @@ const Header = ({ brand }) => {
           Pedido Nuevo
         </Button>
         <Button component={Link} to="/MesaForm" variant="contained" style={{ marginBottom: '16px' }}>
-          Crear mesas
+          Mesas
         </Button>
 
-        <Button component={Link} to="/ProductoForm" variant="contained" style={{ marginBottom: '16px' }}>
-          Crear Productos
+        <Button component={Link} to="/editar" variant="contained" style={{ marginBottom: '16px' }}>
+         Productos
         </Button>
-        <Button component={Link} to="/EditarProducto" variant="contained" style={{ marginBottom: '16px' }}>
-          Actualizar Productos
+        <Button component={Link} to="/ClienteForm" variant="contained" style={{ marginBottom: '16px' }}>
+          Clientes
         </Button>
+        
       </Container>
 
     </Box>

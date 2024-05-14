@@ -5,10 +5,10 @@ import Menu from '../pages/Menu'
 import { BrowserRouter as Router, Routes, Route }from 'react-router-dom';
 import Producto from '../pages/Producto'
 import MesaForm from '../pages/MesaForm'
-import ProductoForm from '../pages/ProductoForm'
+
 import ClienteForm from '../pages/ClienteForm'
-import EditarProducto from '../pages/EditarProducto'
-import UpdateProductoForm from '../pages/UpdateProductoForm';
+
+import Edit from '../pages/Edit'
 
 
 
@@ -20,11 +20,11 @@ const Routers = () => {
     <Route path="/pedidonuevo"element={<PedidoNuevo/>}/>    
     <Route path="/menu"element={<Menu/>}/>
     <Route path="/productos"element={<Producto/>}/>    
-    <Route path="/productoform"element={<ProductoForm/>}/>
+    
     <Route path="/mesaform"element={<MesaForm/>}/>
     <Route path="/clienteform"element={<ClienteForm/>}/>
-    <Route path="/editarproducto"element={<EditarProducto/>}/>
-    <Route path="/editarproducto"element={<UpdateProductoForm/>}/>
+    
+    <Route path="/editar"element={<Edit/>}/>
   </Routes>
   
 }
