@@ -58,6 +58,7 @@ function EditarProducto() {
           </Button>
         </div>
         {error && <Typography variant="body1" color="error">{error}</Typography>}
+        
         {productoEncontrado && <UpdateProductoForm producto={productoEncontrado} />}
       </div>
     </Container>

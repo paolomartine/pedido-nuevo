@@ -8,6 +8,7 @@ import MesaForm from '../pages/MesaForm'
 import ProductoForm from '../pages/ProductoForm'
 import ClienteForm from '../pages/ClienteForm'
 import EditarProducto from '../pages/EditarProducto'
+import UpdateProductoForm from '../pages/UpdateProductoForm';
 
 
 
@@ -23,7 +24,7 @@ const Routers = () => {
     <Route path="/mesaform"element={<MesaForm/>}/>
     <Route path="/clienteform"element={<ClienteForm/>}/>
     <Route path="/editarproducto"element={<EditarProducto/>}/>
-
+    <Route path="/editarproducto"element={<UpdateProductoForm/>}/>
   </Routes>
   
 }

@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import './Mesas.css';
 import { Link, useNavigate } from 'react-router-dom';
 
 const API_BASE_URL = 'http://localhost:8085';
 
 function Mesas() {
   const [mesas, setMesas] = useState([]);
+  const [mesaSeleccionada, setMesaSeleccionada] = useState(null); // Variable para almacenar el ID de la mesa seleccionada
   const navigate = useNavigate(); // Importa useNavigate
 
   useEffect(() => {
@@ -27,15 +27,6 @@ function Mesas() {
 
   const handleSeleccionarMesa = async (mesaId) => {
     try {
-      // Cambiar la disponibilidad localmente
-      const updatedMesas = mesas.map(mesa => {
-        if (mesa.id === mesaId) {
-          mesa.disponibilidad = !mesa.disponibilidad; // Cambia el estado de disponibilidad
-        }
-        return mesa;
-      });
-      setMesas(updatedMesas);
-
       // Actualizar la disponibilidad en la base de datos
       await fetch(`${API_BASE_URL}/api/v1/mesas/${mesaId}`, {
         method: 'PUT',
@@ -45,8 +36,11 @@ function Mesas() {
         body: JSON.stringify({ disponibilidad: !mesas.find(mesa => mesa.id === mesaId).disponibilidad })
       });
 
+      // Almacenar el ID de la mesa seleccionada
+      setMesaSeleccionada(mesaId);
+
       // Redireccionar a la página de productos después de cambiar la disponibilidad
-      navigate(`/productos?mesaId=${mesaId}&disponibilidad=${!mesas.find(mesa => mesa.id === mesaId).disponibilidad}`);
+      navigate(`/productos?mesaId=${mesaId}`);
     } catch (error) {
       console.error('Error al actualizar la disponibilidad: ', error);
     }
@@ -70,7 +64,7 @@ function Mesas() {
       </div>
       <div>
         <Link to="/productos">
-          <button>Continuar</button>
+          <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded disabled:opacity-50" disabled={!mesaSeleccionada}>Continuar</button> {/* Deshabilitar el botón si no se ha seleccionado una mesa */}
         </Link>
       </div>
     </div>

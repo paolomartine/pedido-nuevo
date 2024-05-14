@@ -5,15 +5,14 @@ import Typography from "@mui/material/Typography";
 
 const UpdateProductoForm = () => {
   const [producto, setProducto] = useState({
-    id:"",
+    id: "",
     nombre: "",
     url: "",
     tiempoPreparacion: "",
     precio: "",
     ingredientes: "",
-    
   });
-  const [loading, setLoading] = useState(false);  
+  const [loading, setLoading] = useState(false);
   const [precioError, setPrecioError] = useState(false);
   const [tiempoPreparacionError, setTiempoPreparacionError] = useState(false);
 
@@ -21,25 +20,25 @@ const UpdateProductoForm = () => {
   const params = useParams();
 
   useEffect(() => {
+    const loadProducto = async () => {
+      try {
+        const res = await fetch(`http://localhost:8085/api/v1/productos/${params.id}`);
+        if (!res.ok) {
+          throw new Error('Failed to fetch product data');
+        }
+        const data = await res.json();
+        console.log('Producto cargado:', data); // Agregar registro de consola
+
+        setProducto(data);
+      } catch (error) {
+        console.error('Error al cargar el producto:', error); // Agregar registro de consola
+      }
+    };
+
     if (params.id) {
-      loadProducto(params.id);
+      loadProducto();
     }
   }, [params.id]);
-
-  const loadProducto = async (id) => {
-    try {
-      const res = await fetch(`http://localhost:8085/api/v1/productos/${id}`);
-      if (!res.ok) {
-        throw new Error('Failed to fetch product data');
-      }
-      const data = await res.json();
-      console.log('Producto cargado:', data); // Agregar registro de consola
-      setProducto(data);
-    } catch (error) {
-      console.error('Error al cargar el producto:', error); // Agregar registro de consola
-    }
-  };
-  
 
   const handleDelete = async (id) => {
     try {
@@ -113,11 +112,11 @@ const UpdateProductoForm = () => {
           <input
             type="text"
             name="id"
-            placeholder="id producto"
+            placeholder="ID del producto"
             className="border border-gray-400 p-2 rounded-md block w-full"
             onChange={handleChange}
             value={producto.id}
-            autoFocus
+            readOnly // El ID no debería ser editable
           />
         </div>
 
@@ -129,9 +128,20 @@ const UpdateProductoForm = () => {
             className="border border-gray-400 p-2 rounded-md block w-full"
             onChange={handleChange}
             value={producto.nombre}
-            autoFocus
           />
         </div>
+
+        <div className="mb-4">
+          <input
+            type="text"
+            name="url"
+            placeholder="URL de la imagen"
+            className="border border-gray-400 p-2 rounded-md block w-full"
+            onChange={handleChange}
+            value={producto.url}
+          />
+        </div>
+
         <div className="mb-4">
           <input
             type="text"
@@ -147,6 +157,7 @@ const UpdateProductoForm = () => {
             </Typography>
           )}
         </div>
+
         <div className="mb-4">
           <input
             type="text"
@@ -162,6 +173,7 @@ const UpdateProductoForm = () => {
             </Typography>
           )}
         </div>
+
         <div className="mb-4">
           <textarea
             name="ingredientes"
@@ -172,16 +184,7 @@ const UpdateProductoForm = () => {
             value={producto.ingredientes}
           ></textarea>
         </div>
-        <div className="mb-4">
-          <input
-            type="text"
-            name="url"
-            placeholder="URL de la imagen"
-            className="border border-gray-400 p-2 rounded-md block w-full"
-            onChange={handleChange}
-            value={producto.url}
-          />
-        </div>
+
         <div className="flex justify-between">
           <button
             type="submit"
@@ -198,7 +201,7 @@ const UpdateProductoForm = () => {
           >
             {loading ? "Cargando..." : "Guardar"}
           </button>
-          
+
           <button
             className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded disabled:opacity-50"
             onClick={() => handleDelete(params.id)}
@@ -206,7 +209,6 @@ const UpdateProductoForm = () => {
             Eliminar
           </button>
         </div>
-        
       </form>
     </Container>
   );
