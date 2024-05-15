@@ -2,7 +2,7 @@ import React from 'react'
 import Mesas from '../pages/Mesas'
 import PedidoNuevo from '../pages/PedidoNuevo'
 import Menu from '../pages/Menu'
-import { BrowserRouter as Router, Routes, Route }from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Producto from '../pages/Producto'
 import MesaForm from '../pages/MesaForm'
 
@@ -15,18 +15,18 @@ import Edit from '../pages/Edit'
 
 const Routers = () => {
   return <Routes>
-    <Route path="/"element={<Menu/>}/>
-    <Route path="/mesas"element={<Mesas/>}/>
-    <Route path="/pedidonuevo"element={<PedidoNuevo/>}/>    
-    <Route path="/menu"element={<Menu/>}/>
-    <Route path="/productos"element={<Producto/>}/>    
-    
-    <Route path="/mesaform"element={<MesaForm/>}/>
-    <Route path="/clienteform"element={<ClienteForm/>}/>
-    
-    <Route path="/editar"element={<Edit/>}/>
+    <Route path="/" element={<Menu />} />
+    <Route path="/mesas" element={<Mesas />} />
+    <Route path="/pedidonuevo" element={<PedidoNuevo />} />
+    <Route path="/menu" element={<Menu />} />
+    <Route path="/productos" element={<Producto />} />
+
+    <Route path="/mesaform" element={<MesaForm />} />
+    <Route path="/clienteform" element={<ClienteForm />} />
+
+    <Route path="/editar" element={<Edit />} />
   </Routes>
-  
+
 }
 
 export default Routers

@@ -24,6 +24,9 @@ const Header = ({ brand }) => {
         <Button component={Link} to="/ClienteForm" variant="contained" style={{ marginBottom: '16px' }}>
           Clientes
         </Button>
+        <Button component={Link} to="/menu" variant="contained" style={{ marginBottom: '16px' }}>
+          Menú
+        </Button>
         
       </Container>
 
