@@ -125,7 +125,6 @@ function Edit() {
 
     }
 
-
     const editarProducto = (val) => {
         setEditar(true);
         setId(val.id);
