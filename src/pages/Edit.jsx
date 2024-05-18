@@ -48,6 +48,17 @@ function Edit() {
     };
 
     const add = () => {
+
+        if (nombre == "" || url == "" || precio == ""|| ingredientes == ""|| tiempoPreparacion == "") {
+            MySwal.fire({
+                icon: "error",
+                title: "Oops...",
+                text: "No puede enviar campos vacios!",
+                footer: '<a href="#">Intente de nuevo?</a>'
+            });
+            limpiarCampos();
+        } else
+
         axios
             .post("http://localhost:8085/api/v1/productos", {
                 nombre,
