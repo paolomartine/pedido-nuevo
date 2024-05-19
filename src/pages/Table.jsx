@@ -165,7 +165,7 @@ function Table() {
                             </td>
                             <td>
                                 <ButtonGroup>
-                                    <Button variant="secondary" onClick={() => editarMesa(mesa)}>Editar</Button>
+                                    <Button variant="secondary" onClick={() => editarMesa(mesa)}>Seleccionar</Button>
                                     <Button variant="danger" onClick={() => eliminar(mesa)}>Eliminar</Button>
                                 </ButtonGroup>
                             </td>

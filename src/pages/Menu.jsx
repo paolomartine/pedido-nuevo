@@ -2,8 +2,7 @@ import * as React from 'react';
 import ImageList from '@mui/material/ImageList';
 import ImageListItem from '@mui/material/ImageListItem';
 import ImageListItemBar from '@mui/material/ImageListItemBar';
-import Button from '@mui/material/Button';
-import { Link } from 'react-router-dom';
+import "bootstrap/dist/css/bootstrap.min.css";
 
 export default function TitlebarBelowImageList() {
   const [productos, setProductos] = React.useState([]);
@@ -39,7 +38,7 @@ export default function TitlebarBelowImageList() {
             />
             <ImageListItemBar
               title={producto.nombre}
-              subtitle={<span style={{ fontFamily: 'Arial, sans-serif', color: 'white', textShadow: '2px 2px black' }}>Ingredientes: {producto.ingredientes}</span>}
+              subtitle={<span style={{ fontFamily: 'Arial, sans-serif', color: 'white', textShadow: '2px 2px black' }}> {producto.ingredientes}</span>}
               style={{ color: 'white' }}
               position="below"
             />

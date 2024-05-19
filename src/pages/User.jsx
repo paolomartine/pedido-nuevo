@@ -174,7 +174,7 @@ function User() {
                         onChange={handleChange}
                         name="direccion"
                         value={direccion}
-                        className="form control"
+                        className="form-control"
                         placeholder="Dirección"
                         aria-label="Dirección"
                         aria-describedby="basic-addon1"

@@ -116,7 +116,7 @@ function Edit() {
                     limpiarCampos();
                     MySwal.fire({
                         title: "Eliminado!",
-                        text: producto.nombre + "El producto ha sido eliminado!",
+                        text:  "El producto: "+producto.nombre + ", ha sido eliminado!",
                         icon: "success"
                     })
                 });
