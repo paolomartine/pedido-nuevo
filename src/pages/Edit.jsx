@@ -12,13 +12,13 @@ function Edit() {
     const [id, setId] = useState();
     const [nombre, setNombre] = useState("");
     const [url, setUrl] = useState("");
-    const [tiempoPreparacion, setTiempoPreparacion] = useState();
+
     const [precio, setPrecio] = useState();
-    const [ingredientes, setIngredientes] = useState("");
+    const [descripcion, setDescripcion] = useState("");
     const [editar, setEditar] = useState(false);
     const [productosList, setProductos] = useState([]);
     const [precioError, setPrecioError] = useState(false);
-    const [tiempoPreparacionError, setTiempoPreparacionError] = useState(false);
+
 
     useEffect(() => {
         getProductos();
@@ -33,23 +33,17 @@ function Edit() {
             } else {
                 setPrecioError(false);
             }
-        } else if (name === "tiempoPreparacion") {
-            setTiempoPreparacion(value);
-            if (isNaN(value) || parseFloat(value) <= 0) {
-                setTiempoPreparacionError(true);
-            } else {
-                setTiempoPreparacionError(false);
-            }
+
         } else {
             if (name === "nombre") setNombre(value);
             if (name === "url") setUrl(value);
-            if (name === "ingredientes") setIngredientes(value);
+            if (name === "descripcion") setDescripcion(value);
         }
     };
 
     const add = () => {
 
-        if (nombre == "" || url == "" || precio == ""|| ingredientes == ""|| tiempoPreparacion == "") {
+        if (nombre == "" || url == "" || precio == "" || descripcion == "") {
             MySwal.fire({
                 icon: "error",
                 title: "Oops...",
@@ -59,34 +53,33 @@ function Edit() {
             limpiarCampos();
         } else
 
-        axios
-            .post("http://localhost:8085/api/v1/productos", {
-                nombre,
-                url,
-                tiempoPreparacion,
-                precio,
-                ingredientes,
-            })
-            .then(() => {
-                getProductos();
-                limpiarCampos();
-                MySwal.fire({
-                    title: "<strong>Registro exitoso!!!</strong> ",
-                    html: "<i> <strong> El producto " + nombre + " fue creado con éxito! </i>",
-                    icon: "success"
+            axios
+                .post("http://localhost:8085/api/v1/productos", {
+                    nombre,
+                    url,
+
+                    precio,
+                   descripcion,
+                })
+                .then(() => {
+                    getProductos();
+                    limpiarCampos();
+                    MySwal.fire({
+                        title: "<strong>Registro exitoso!!!</strong> ",
+                        html: "<i> <strong> El producto " + nombre + " fue creado con éxito! </i>",
+                        icon: "success"
+                    });
                 });
-            });
     };
 
     const update = () => {
         axios.put("http://localhost:8085/api/v1/productos", {
-                id,
-                nombre,
-                url,
-                tiempoPreparacion,
-                precio,
-                ingredientes,
-            })
+            id,
+            nombre,
+            url,
+            precio,
+            descripcion,
+        })
             .then(() => {
                 getProductos();
                 MySwal.fire({
@@ -116,11 +109,11 @@ function Edit() {
                     limpiarCampos();
                     MySwal.fire({
                         title: "Eliminado!",
-                        text:  "El producto: "+producto.nombre + ", ha sido eliminado!",
+                        text: "El producto: " + producto.nombre + ", ha sido eliminado!",
                         icon: "success"
                     })
                 });
-                
+
             }
         });
 
@@ -129,9 +122,9 @@ function Edit() {
     const limpiarCampos = () => {
         setNombre("");
         setId("");
-        setIngredientes("");
+        setDescripcion("");
         setPrecio("");
-        setTiempoPreparacion("");
+
         setUrl("");
 
     }
@@ -141,8 +134,8 @@ function Edit() {
         setId(val.id);
         setNombre(val.nombre);
         setUrl(val.url);
-        setTiempoPreparacion(val.tiempoPreparacion);
-        setIngredientes(val.ingredientes);
+
+        setDescripcion(val.descripcion);
         setPrecio(val.precio);
     };
 
@@ -190,22 +183,7 @@ function Edit() {
                         aria-describedby="basic-addon1"
                     />
                 </div>
-                <div className="input-group mb-3">
-                    <span className="input-group-text" id="basic-addon1">Tiempo de preparación:</span>
-                    <input
-                        type="number"
-                        onChange={handleChange}
-                        name="tiempoPreparacion"
-                        value={tiempoPreparacion}
-                        className={`form-control ${tiempoPreparacionError ? "is-invalid" : ""}`}
-                        placeholder="Preparación en minutos"
-                        aria-label="Tiempo de preparación"
-                        aria-describedby="basic-addon1"
-                    />
-                    {tiempoPreparacionError && (
-                        <div className="invalid-feedback">El tiempo de preparación debe ser un número mayor a 0.</div>
-                    )}
-                </div>
+
                 <div className="input-group mb-3">
                     <span className="input-group-text" id="basic-addon1">Precio:</span>
                     <input
@@ -223,15 +201,15 @@ function Edit() {
                     )}
                 </div>
                 <div className="input-group mb-3">
-                    <span className="input-group-text" id="basic-addon1">Ingredientes:</span>
+                    <span className="input-group-text" id="basic-addon1">Descripción:</span>
                     <input
                         type="text"
                         onChange={handleChange}
-                        name="ingredientes"
+                        name="descripcion"
                         className="form-control"
-                        value={ingredientes}
-                        placeholder="Ingredientes de producto"
-                        aria-label="Ingredientes"
+                        value={descripcion}
+                        placeholder="Descripción de producto"
+                        aria-label="Descripción"
                         aria-describedby="basic-addon1"
                     />
                 </div>
@@ -250,9 +228,8 @@ function Edit() {
                 <thead>
                     <tr>
                         <th scope="col">#</th>
-                        <th scope="col">Nombre</th>
-                        <th scope="col">Tiempo preparación</th>
-                        <th scope="col">Ingredientes</th>
+                        <th scope="col">Nombre</th>                        
+                        <th scope="col">Descripción</th>
                         <th scope="col">Precio</th>
                         <th scope="col"></th>
                     </tr>
@@ -262,8 +239,7 @@ function Edit() {
                         <tr key={producto.id}>
                             <th scope="row">{producto.id}</th>
                             <td>{producto.nombre}</td>
-                            <td>{producto.tiempoPreparacion}</td>
-                            <td>{producto.ingredientes}</td>
+                            <td>{producto.descripcion}</td>
                             <td>{producto.precio}</td>
                             <td>
                                 <ButtonGroup>

@@ -88,9 +88,9 @@ function Producto() {
             </div>
             <div className="producto-details">
               <p className="producto-nombre" style={{ fontWeight: 'bold' }}>Nombre: {producto.nombre}</p>
-              <p>Tiempo de preparación: {producto.tiempoPreparacion}</p>
+              
               <p>Precio: {producto.precio}</p>
-              <p>Ingredientes: {producto.ingredientes}</p>
+              <p>Descripcion: {producto.descripcion}</p>
               <DropdownNumerosMayoresACero numeros={[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]} onChange={(cantidad) => setCantidad(cantidad)} />
               <Button onClick={() => setSelectedProductId(producto.id)} variant="contained" style={{ marginTop: '8px' }}>Agregar al pedido</Button>
             </div>

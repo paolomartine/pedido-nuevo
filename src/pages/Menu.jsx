@@ -26,7 +26,7 @@ export default function TitlebarBelowImageList() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', backgroundColor: 'red', padding: '16px' }}>
-      
+
       <ImageList style={{ width: '100%', maxWidth: 500 }}>
         {productos.map((producto) => (
           <ImageListItem key={producto.id}>
@@ -38,7 +38,17 @@ export default function TitlebarBelowImageList() {
             />
             <ImageListItemBar
               title={producto.nombre}
-              subtitle={<span style={{ fontFamily: 'Arial, sans-serif', color: 'white', textShadow: '2px 2px black' }}> {producto.ingredientes}</span>}
+              subtitle={
+                <span style={{
+                  fontFamily: 'Arial, sans-serif',
+                  color: 'white',
+                  textShadow: '2px 2px black'
+                }}>
+                  {producto.descripcion}
+                  <br />
+                  Precio: ${producto.precio}
+                </span>
+              }
               style={{ color: 'white' }}
               position="below"
             />
