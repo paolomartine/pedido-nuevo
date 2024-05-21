@@ -34,13 +34,11 @@ function User() {
             });
             limpiarCampos();
         } else
-
             axios
                 .post("http://localhost:8085/api/v1/clientes", {
                     nombre,
                     contacto,
                     direccion,
-
                 })
                 .then(() => {
                     getClientes();

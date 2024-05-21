@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+/* import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Button, ButtonGroup } from "react-bootstrap";
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -274,9 +274,9 @@ const App = () => (
     </div>
 );
 
-export default App;
+export default App; */
 
-/* import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
@@ -284,39 +284,39 @@ const PedidoForm = () => {
     const [clientes, setClientes] = useState([]);
     const [mesas, setMesas] = useState([]);
     const [pedidos, setPedidos] = useState([]);
-    const [formData, setFormData] = useState({
-        id_cliente: '',
-        id_mesa: '',
-        estado: '0'
-    });
+    const [clienteId, setClienteId]=useState()
+    const [mesaId, setMesaId]=useState()
+    const [estados, setEstados]=useState(0)
 
     useEffect(() => {
         // Reemplaza 'http://host/api/clientes' y 'http://host/api/mesas' con las URLs reales de tu API
-        axios.get('http://host/api/clientes')
+        axios.get('http://localhost:8085/api/v1/clientes')
             .then(response => setClientes(response.data))
             .catch(error => console.error('Error fetching clientes:', error));
 
-        axios.get('http://host/api/mesas')
+        axios.get('http://localhost:8085/api/v1/mesas')
             .then(response => setMesas(response.data))
             .catch(error => console.error('Error fetching mesas:', error));
 
-        axios.get('http://host/api/pedidos')
+        axios.get('http://localhost:8085/api/v1/pedidos')
             .then(response => setPedidos(response.data))
             .catch(error => console.error('Error fetching pedidos:', error));
     }, []);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormData(prevState => ({
-            ...prevState,
-            [name]: value
-        }));
+        {
+            if (name === "id_cliente") setClienteId(value);
+            if (name === "id_mesa") setMesaId(value);
+            if (name === "estado") setEstados(value);
+        }
+        
     };
 
     const handleSubmit = (e) => {
         e.preventDefault();
         // Reemplaza 'http://host/api/pedidos' con la URL real de tu API
-        axios.post('http://host/api/pedidos', formData)
+        axios.post('http://localhost:8085/api/v1/pedidos',{clienteId, mesaId, estados} )
             .then(response => {
                 console.log('Pedido creado:', response.data);
                 setPedidos([...pedidos, response.data]);
@@ -327,20 +327,21 @@ const PedidoForm = () => {
     return (
         <div className="container mt-4">
             <h2>Crear Pedido</h2>
-            <form onSubmit={handleSubmit}>
+            <form >
                 <div className="mb-3">
                     <label htmlFor="id_cliente" className="form-label">Cliente</label>
                     <select
-                        id="id_cliente"
+                        /* id="id_cliente"
                         name="id_cliente"
                         className="form-select"
-                        value={formData.id_cliente}
-                        onChange={handleChange}
+                        value={formData.id_cliente} */
+                        
                         required
                     >
                         <option value="">Selecciona un cliente</option>
+
                         {clientes.map(cliente => (
-                            <option key={cliente.id} value={cliente.id}>
+                            <option key={cliente.id} name="id_cliente" value={cliente.id} onChange={handleChange}>
                                 {cliente.nombre}
                             </option>
                         ))}
@@ -349,16 +350,17 @@ const PedidoForm = () => {
                 <div className="mb-3">
                     <label htmlFor="id_mesa" className="form-label">Mesa</label>
                     <select
-                        id="id_mesa"
+                        /* id="id_mesa"
                         name="id_mesa"
                         className="form-select"
-                        value={formData.id_mesa}
-                        onChange={handleChange}
+                        value={formData.id_mesa} 
+                        onChange={handleChange}*/
+
                         required
                     >
-                        <option value="">Selecciona una mesa</option>
+                        <option value="">Selecciona una mesa</option >
                         {mesas.map(mesa => (
-                            <option key={mesa.id} value={mesa.id}>
+                            <option key={mesa.id} value={mesa.id} name="id_mesa"  onChange={handleChange}>
                                 {mesa.id} - {mesa.disponibilidad ? 'Disponible' : 'No Disponible'}
                             </option>
                         ))}
@@ -367,19 +369,19 @@ const PedidoForm = () => {
                 <div className="mb-3">
                     <label htmlFor="estado" className="form-label">Estado</label>
                     <select
-                        id="estado"
+                        /* id="estado"
                         name="estado"
                         className="form-select"
                         value={formData.estado}
-                        onChange={handleChange}
+                        onChange={handleChange} */
                         required
                     >
-                        <option value="0">Pedido</option>
-                        <option value="1">Despachado</option>
-                        <option value="2">Pagado</option>
+                        <option onChange={handleChange} name="estado" id="estado" value={0}>Pedido</option>
+                        <option onChange={handleChange} name="estado" id="estado" value={1} >Despachado</option>
+                        <option onChange={handleChange} name="estado" id="estado" value={2} >Pagado</option>
                     </select>
                 </div>
-                <button type="submit" className="btn btn-primary">Crear Pedido</button>
+                <button onClick={handleSubmit} className="btn btn-primary">Crear Pedido</button>
             </form>
             <h3 className="mt-4">Pedidos Guardados</h3>
             <table className="table table-striped">
@@ -397,7 +399,7 @@ const PedidoForm = () => {
                             <td>{pedido.id}</td>
                             <td>{pedido.id_cliente.nombre}</td>
                             <td>{pedido.id_mesa.id}</td>
-                            <td>{['Pedido', 'Despachado', 'Pagado'][pedido.estado]}</td>
+                            <td>{pedido.estado}</td>
                         </tr>
                     ))}
                 </tbody>
@@ -414,4 +416,4 @@ const App = () => (
 
 export default App;
 
- */
+ 
