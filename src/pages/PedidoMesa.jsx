@@ -32,7 +32,7 @@ function PedidoMesa() {
     }
 
     const add = async () => {
-        if (mesaId === "" || clienteId === "" || estado === "") {
+        if (mesaResponse === "" || clienteResponse === "" || estado === "") {
             MySwal.fire({
                 icon: "error",
                 title: "Oops...",
@@ -70,7 +70,8 @@ function PedidoMesa() {
                 mesaResponse: mesaResponse.data,
                 estado,
             });
-
+            getClientes();
+            getMesas();
             getPedidos();
             limpiarCampos();
             MySwal.fire({
@@ -97,6 +98,8 @@ function PedidoMesa() {
                 mesaResponse,
                 estado,
             });
+            getClientes();
+            getMesas();
             getPedidos();
             MySwal.fire({
                 title: "<strong>Actualización exitosa!!!</strong>",
@@ -209,18 +212,18 @@ function PedidoMesa() {
 
                 <div className="input-group mb-3">
                     <span className="input-group-text" id="basic-addon1">Estado:</span>
-                    <select 
-                        name="estado" 
+                    <select
+                        name="estado"
                         type="number"
-                        onChange={handleChange}                        
+                        onChange={handleChange}
                         value={estado}
                         placeholder="Estado"
                         aria-label="Estado de pedido"
                         aria-describedby="basic-addon1"
-                        >
-                        <option value="1">Pedido</option>
-                        <option value="2">Despachado</option>
-                        <option value="3">Pagado</option>
+                    >
+                        <option value="0">Pedido</option>
+                        <option value="1">Despachado</option>
+                        <option value="2">Pagado</option>
                     </select>
                 </div>
 
@@ -249,8 +252,8 @@ function PedidoMesa() {
                     {pedidosList.map((pedido) => (
                         <tr key={pedido.id}>
                             <th scope="row">{pedido.id}</th>
+                            <td>{pedido.mesaResponse.id}</td>
                             <td>{pedido.clienteResponse.nombre}</td>
-                            <td>{pedido.mesaId}</td>
                             <td>{pedido.estado}</td>
                             <td>
                                 <ButtonGroup>
