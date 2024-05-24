@@ -57,7 +57,6 @@ function Edit() {
                 .post("http://localhost:8085/api/v1/productos", {
                     nombre,
                     url,
-
                     precio,
                    descripcion,
                 })
