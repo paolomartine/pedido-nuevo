@@ -8,8 +8,6 @@ import User from '../pages/User'
 import Edit from '../pages/Edit'
 import PedidoMesa from '../pages/PedidoMesa';
 import PedidoForm from '../pages/PedidoForm';
-import DetallePedido from '../pages/DetallePedido';
-import Pedido from '../pages/Pedido';
 
 const Routers = () => {
   return <Routes>
@@ -20,8 +18,8 @@ const Routers = () => {
     <Route path="/mesas" element={<Table />} />
     <Route path="/editar" element={<Edit />} />
     <Route path="/clientes" element={<User />} />
-    <Route path="/pedidos" element={<Pedido />} />
-    <Route path="/detalle" element={<DetallePedido />} />
+    {/* <Route path="/pedidos" element={<PedidoMesa />} /> */}
+    <Route path="/pedidos" element={<PedidoForm />} />
   </Routes>
 
 }
