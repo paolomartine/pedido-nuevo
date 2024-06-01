@@ -2,178 +2,171 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-import Swal from 'sweetalert2'
-import withReactContent from 'sweetalert2-react-content'
+import Swal from 'sweetalert2';
+import withReactContent from 'sweetalert2-react-content';
 
-const MySwal = withReactContent(Swal)
+import { useNavigate } from "react-router-dom";
+import { Link } from 'react-router-dom'
+
+const MySwal = withReactContent(Swal);
 
 const PedidoForm = () => {
+    const [id, setId] = useState("");
+    const [disponibilidad, setDisponibilidad] = useState(true);
+    const [selectedCliente, setSelectedCliente] = useState([]);
+    const [selectedMesas, setSelectedMesas] = useState([]);
     const [clientes, setClientes] = useState([]);
     const [mesas, setMesas] = useState([]);
-    const [pedidos, setPedidos] = useState([]);
-    const [clienteId, setClienteId] = useState("");
-    const [mesaId, setMesaId] = useState("");
-    const [estado, setEstado] = useState(0);
+    const [formData, setFormData] = useState({
+        cliente: null,
+        mesa: null,
+        estado: ''
+    });
+
+    const navigate = useNavigate();
 
     useEffect(() => {
-        axios.get('http://localhost:8085/api/v1/clientes')
-            .then(response => setClientes(response.data))
-            .catch(error => console.error('Error fetching clientes:', error));
-
-        axios.get('http://localhost:8085/api/v1/mesas')
-            .then(response => setMesas(response.data))
-            .catch(error => console.error('Error fetching mesas:', error));
-
-        axios.get('http://localhost:8085/api/v1/pedidos')
-            .then(response => setPedidos(response.data))
-            .catch(error => console.error('Error fetching pedidos:', error));
+        obtenerClientes();
+        obtenerMesas();
     }, []);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        if (name === "id_cliente") setClienteId(value);
-        if (name === "id_mesa") setMesaId(value);
-        if (name === "estado") setEstado(value);
-    };
-
-    const handleSubmit = (e) => {
-        e.preventDefault();
-
-        axios.post('http://localhost:8085/api/v1/pedidos', { clienteId, mesaId, estado })
-            .then(response => {
-                console.log('Pedido creado:', response.data);
-                setPedidos([...pedidos, response.data]);
-            })
-            .catch(error => console.error('Error creating pedido:', error));
-    };
-
-    const add = () => {
-        if (clienteId === "" || mesaId === "" || estado === "") {
-            MySwal.fire({
-                icon: "error",
-                title: "Oops...",
-                text: "No puede enviar campos vacios!",
-                footer: '<a href="#">Intente de nuevo?</a>'
+        if (name === "idCliente") {
+            const selectedCliente = clientes.find(cliente => cliente.id === parseInt(value));
+            setFormData({
+                ...formData,
+                cliente: selectedCliente
             });
-            limpiarCampos();
+        } else if (name === "idMesa") {
+            const selectedMesa = mesas.find(mesa => mesa.id === parseInt(value));
+            setFormData({
+                ...formData,
+                mesa: selectedMesa
+            });
         } else {
-            axios.post("http://localhost:8085/api/v1/pedidos", { clienteId, mesaId, estado })
-                .then(() => {
-                    getPedidos();
-                    limpiarCampos();
-                    MySwal.fire({
-                        title: "<strong>Registro exitoso!!!</strong>",
-                        html: `<i>El pedido de la mesa ${mesaId} fue creado con éxito!</i>`,
-                        icon: "success"
-                    });
-                })
-                .catch(error => console.error('Error creating pedido:', error));
+            setFormData({
+                ...formData,
+                [name]: value
+            });
         }
     };
 
-    const limpiarCampos = () => {
-        setClienteId("");
-        setMesaId("");
-        setEstado("");
-    };
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        const id_cliente=formData.cliente
+        const id_mesa=formData.mesa
+        const estado=formData.estado
 
-    const getPedidos = async () => {
         try {
-            const response = await axios.get("http://localhost:8085/api/v1/pedidos");
-            setPedidos(response.data);
+            const response = await axios.post('http://localhost:8085/api/v1/pedidos',  {id_cliente, id_mesa, estado} );
+            console.log('Prueba:', formData);
+
+            limpiarFormulario();
+            MySwal.fire({
+                title: "El pedido ha empezado?",
+                text: "Escoge tus prodcutos favoritos?",
+                icon: "burguer"
+            });
+
+            navigate("/detallepedido")
+
+            console.log('Response:', response.data);
         } catch (error) {
-            console.error(error);
+            console.error('Error sending data:', error);
         }
+    };
+
+    const obtenerClientes = async () => {
+        try {
+            const response = await axios.get('http://localhost:8085/api/v1/clientes');
+            setClientes(response.data);
+        } catch (error) {
+            console.error('Error al obtener clientes:', error);
+        }
+    };
+
+    const obtenerMesas = async () => {
+        try {
+            const response = await axios.get('http://localhost:8085/api/v1/mesas');
+            setMesas(response.data);
+        } catch (error) {
+            console.error('Error al obtener mesas:', error);
+        }
+    };
+
+    const limpiarFormulario = () => {
+        setFormData({
+            cliente: null,
+            mesa: null,
+            estado: ''
+        });
     };
 
     return (
-        <div className="container mt-4">
-            <h2>Crear Pedido</h2>
-            <form >
-                <div className="mb-3">
-                    <label htmlFor="id_cliente" className="form-label">Cliente</label>
-                    <select
-                        id="id_cliente"
-                        name="id_cliente"
-                        className="form-select"
-                        value={clienteId}
-                        onChange={handleChange}
-                        required
-                    >
-                        <option  value="">Selecciona un cliente</option>
-                        {clientes.map(cliente => (
-                            <option key={cliente.id} value={cliente.id}>
-                                {cliente.nombre}                                
-                            </option>                            
-                        ))}
-
-                    </select>
+        <div className="container mt-3">
+            <div className="card">
+                <div className="card-header">
+                    Pedido
                 </div>
-                <div className="mb-3">
-                    <label htmlFor="id_mesa" className="form-label">Mesa</label>
-                    <select
-                        id="id_mesa"
-                        name="id_mesa"
-                        className="form-select"
-                        value={mesaId}
-                        onChange={handleChange}
-                        required
-                    >
-                        <option value="">Selecciona una mesa</option>
-                        {mesas.map(mesa => (
-                            <option key={mesa.id} value={mesa.id}>
-                                {mesa.id} - {mesa.disponibilidad ? 'Disponible' : 'No Disponible'}
-                            </option>
-                        ))}
-                    </select>
+                <div className="card-body">
+                    <form >
+                        <div className="mb-3">
+                            <label htmlFor="idCliente" className="form-label">Cliente</label>
+                            <select
+                                className="form-select"
+                                name="idCliente"
+                                value={formData.cliente ? formData.cliente.id : ""}
+                                onChange={handleChange}
+                                required
+                            >
+                                <option value="">Seleccionar cliente</option>
+                                {clientes.map((cliente) => (
+                                    <option key={cliente.id} value={cliente.id}>
+                                        {cliente.nombre}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                        <div className="mb-3">
+                            <label htmlFor="idMesa" className="form-label">Mesa</label>
+                            <select
+                                className="form-select"
+                                name="idMesa"
+                                value={formData.mesa ? formData.mesa.id : ""}
+                                onChange={handleChange}
+                                required
+                            >
+                                <option value="">Seleccionar mesa</option>
+                                {mesas.map((mesa) => (
+                                    <option key={mesa.id} value={mesa.id}>
+                                        {mesa.id}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                        <div className="mb-3">
+                            <label htmlFor="estado" className="form-label">
+                                Estado
+                            </label>
+                            <select
+                                id="estado"
+                                name="estado"
+                                className="form-select"
+                                value={FormData.estado}
+                                onChange={handleChange}
+                                required >
+                                <option value={0}>Pedido</option>
+                                <option value={1}>Despachado</option>
+                                <option value={2}>Pagado</option>
+                            </select>
+                        </div>
+                        <button type="submit" onClick={handleSubmit} className="btn btn-primary">Enviar</button>
+                    </form>
                 </div>
-                <div className="mb-3">
-                    <label htmlFor="estado" className="form-label">Estado</label>
-                    <select
-                        id="estado"
-                        name="estado"
-                        className="form-select"
-                        value={estado}
-                        onChange={handleChange}
-                        required
-                    >
-                        <option value={0}>Pedido</option>
-                        <option value={1}>Despachado</option>
-                        <option value={2}>Pagado</option>
-                    </select>
-                </div>
-                <button onClick={handleSubmit} type="submit" className="btn btn-primary">Crear Pedido</button>
-            </form>
-            <h3 className="mt-4">Pedidos Guardados</h3>
-            <table className="table table-striped">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Cliente</th>
-                        <th>Mesa</th>
-                        <th>Estado</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {pedidos.map(pedido => (
-                        <tr key={pedido.id}>
-                            <td>{pedido.id}</td>
-                            <td>{pedido.cliente ? pedido.cliente.nombre : 'N/A'}</td>
-                            <td>{pedido.mesa ? `${pedido.mesa.id} - ${pedido.mesa.disponibilidad ? 'Disponible' : 'No Disponible'}` : 'N/A'}</td>
-                            <td>{pedido.estado}</td>
-                        </tr>
-                    ))}
-                </tbody>
-
-            </table>
+            </div>
         </div>
     );
 };
 
-const App = () => (
-    <div className="container mt-4">
-        <PedidoForm />
-    </div>
-);
-
-export default App;
+export default PedidoForm;

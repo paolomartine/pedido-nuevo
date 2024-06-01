@@ -6,8 +6,15 @@ import Producto from '../pages/Producto'
 import Table from '../pages/Table'
 import User from '../pages/User'
 import Edit from '../pages/Edit'
-import PedidoMesa from '../pages/PedidoMesa';
-import PedidoForm from '../pages/PedidoForm';
+
+import DetallePedido from '../pages/DetallePedido';
+import TablePedido from '../pages/TablePedido';
+import Domicilios from '../pages/Domicilios';
+import OrderForm from '../pages/OrderForm';
+import PedidoForm from '../pages/PedidoForm'
+import Pedido from '../pages/Pedido'
+
+
 
 const Routers = () => {
   return <Routes>
@@ -18,8 +25,13 @@ const Routers = () => {
     <Route path="/mesas" element={<Table />} />
     <Route path="/editar" element={<Edit />} />
     <Route path="/clientes" element={<User />} />
-    {/* <Route path="/pedidos" element={<PedidoMesa />} /> */}
-    <Route path="/pedidos" element={<PedidoForm />} />
+    <Route path="/pedidos" element={<DetallePedido />} /> 
+    <Route path="/mesapedidos" element={<TablePedido />} /> 
+    <Route path="/domicilios" element={<Domicilios />} /> 
+    <Route path="/detallepedido" element={<OrderForm />} />
+    <Route path="/pedido" element={<PedidoForm />} />
+
+    
   </Routes>
 
 }
