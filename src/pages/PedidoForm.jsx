@@ -52,23 +52,54 @@ const PedidoForm = () => {
         }
     };
 
-    const handleSubmit = async (e) => {
+    /* const handleSubmit = async (e) => {
         e.preventDefault();
-        const id_cliente=formData.cliente
-        const id_mesa=formData.mesa
-        const estado=formData.estado
-
+        const id_cliente = formData.cliente;
+        const id_mesa = formData.mesa.id;
+        const estado = formData.estado;
+        const disponibilidad = formData.mesa.disponibilidad;
+    
         try {
-            const response = await axios.post('http://localhost:8085/api/v1/pedidos',  {id_cliente, id_mesa, estado} );
+            const response = await axios.post('http://localhost:8085/api/v1/pedidos', { id_cliente, id_mesa, estado });
             console.log('Prueba:', formData);
-
+    
+            // Realizar el PUT a mesas
+            await axios.put(`http://localhost:8085/api/v1/mesas/${id_mesa}`, {  id_mesa, disponibilidad });
+    
             limpiarFormulario();
             MySwal.fire({
-                title: "El pedido ha empezado?",
-                text: "Escoge tus prodcutos favoritos?",
+                title: "El pedido ha empezado...",
+                text: "¡Escoge tus productos favoritos!",
+                icon: "burger"
+            });
+            
+            navigate("/detallepedido");
+    
+            console.log('Response:', response.data);
+        } catch (error) {
+            console.error('Error sending data:', error);
+        }
+    }; */
+    
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        const id_cliente = formData.cliente
+        const id_mesa = formData.mesa
+        const estado = formData.estado
+        //const id=formData.mesa.id
+        //const disponibilidad=formData.mesa.disponibilidad
+
+        try {
+            const response = await axios.post('http://localhost:8085/api/v1/pedidos', { id_cliente, id_mesa, estado });
+            console.log('Prueba:', formData);
+            //await axios.put(`http://localhost:8085/api/v1/mesas/${id}`, {  id, disponibilidad });
+            limpiarFormulario();
+            MySwal.fire({
+                title: "El pedido ha empezado...",
+                text: "Escoge tus productos favoritos!",
                 icon: "burguer"
             });
-
+            
             navigate("/detallepedido")
 
             console.log('Response:', response.data);
@@ -76,6 +107,8 @@ const PedidoForm = () => {
             console.error('Error sending data:', error);
         }
     };
+
+
 
     const obtenerClientes = async () => {
         try {
@@ -138,9 +171,9 @@ const PedidoForm = () => {
                                 required
                             >
                                 <option value="">Seleccionar mesa</option>
-                                {mesas.map((mesa) => (
-                                    <option key={mesa.id} value={mesa.id}>
-                                        {mesa.id}
+                                {mesas.filter(mesa => mesa.disponibilidad === true).map(filteredMesa => (
+                                    <option key={filteredMesa.id} value={filteredMesa.id}>
+                                        {filteredMesa.id}
                                     </option>
                                 ))}
                             </select>
@@ -156,9 +189,9 @@ const PedidoForm = () => {
                                 value={FormData.estado}
                                 onChange={handleChange}
                                 required >
-                                <option value={0}>Pedido</option>
-                                <option value={1}>Despachado</option>
-                                <option value={2}>Pagado</option>
+                                <option value={1}>Pedido</option>
+                                <option value={2}>Despachado</option>
+                                <option value={3}>Pagado</option>
                             </select>
                         </div>
                         <button type="submit" onClick={handleSubmit} className="btn btn-primary">Enviar</button>

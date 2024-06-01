@@ -55,7 +55,7 @@ const OrderForm = () => {
                 showDenyButton: true,
                 showCancelButton: true,
                 confirmButtonText: "Sí",
-                denyButtonText: No
+                denyButtonText: "No"
             }).then((result)  =>  {
                 if (result.isConfirmed)  {
                     Swal.fire("¡Sí!", "", "success");                  
