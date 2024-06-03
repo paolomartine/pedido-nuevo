@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import 'bootstrap/dist/css/bootstrap.min.css';
-
+import { useNavigate } from "react-router-dom";
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
 
@@ -15,6 +15,8 @@ const OrderForm = () => {
         producto: null,
         cantidad: 0
     });
+
+    const navigate = useNavigate();
 
     useEffect(() => {
         obtenerPedidos();
@@ -49,23 +51,26 @@ const OrderForm = () => {
         const id_producto = formData.producto
         const cantidad = formData.cantidad
         try {
-            const response = await axios.post('http://localhost:8085/api/v1/detallepedidos', { id_pedido, id_producto, cantidad });
+            const response = await axios.post('http://localhost:8085/api/v1/detallepedidos', { 
+                id_pedido, 
+                id_producto, 
+                cantidad });
             MySwal.fire({
-                title: "¿Quieres pedir algo más?",
+                title: "¿Quiéres pedir algo más?",
                 showDenyButton: true,
                 showCancelButton: true,
                 confirmButtonText: "Sí",
                 denyButtonText: "No"
             }).then((result)  =>  {
                 if (result.isConfirmed)  {
-                    Swal.fire("¡Sí!", "", "success");                  
-
-                    limpiarproycantidad();                    
-                                        
+                    Swal.fire("Qué otro producto deseas?", "", "success"); 
+                     limpiarproycantidad();                    
+                     navigate("/detallepedido")   
                 } else if (result.isDenied) {
 
                     Swal.fire("Pedido terminado", "", "info");
                     limpiar();
+                    navigate("/menu")
                 }
             });
             console.log('Response:', response.data);

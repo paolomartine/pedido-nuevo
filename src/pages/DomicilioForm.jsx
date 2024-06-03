@@ -9,13 +9,13 @@ import { useNavigate } from "react-router-dom";
 
 const MySwal = withReactContent(Swal);
 
-const PedidoForm = () => {
+const DomicilioForm = () => {
 
     const [clientes, setClientes] = useState([]);
-    const [mesas, setMesas] = useState([]);
+   
     const [formData, setFormData] = useState({
         cliente: null,
-        mesa: null,
+        
         estado: '0'
     });
 
@@ -23,7 +23,7 @@ const PedidoForm = () => {
 
     useEffect(() => {
         obtenerClientes();
-        obtenerMesas();
+        
     }, []);
 
     const handleChange = (e) => {
@@ -34,12 +34,7 @@ const PedidoForm = () => {
                 ...formData,
                 cliente: selectedCliente
             });
-        } else if (name === "idMesa") {
-            const selectedMesa = mesas.find(mesa => mesa.id === parseInt(value));
-            setFormData({
-                ...formData,
-                mesa: selectedMesa
-            });
+        
         } else {
             setFormData({
                 ...formData,
@@ -53,13 +48,13 @@ const PedidoForm = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         const id_cliente = formData.cliente
-        const id_mesa = formData.mesa
+        
         const estado = formData.estado
 
         try {
             const response = await axios.post('http://localhost:8085/api/v1/pedidos', {
                 id_cliente,
-                id_mesa,
+                
                 estado
             });
             update();
@@ -101,19 +96,12 @@ const PedidoForm = () => {
         }
     };
 
-    const obtenerMesas = async () => {
-        try {
-            const response = await axios.get('http://localhost:8085/api/v1/mesas');
-            setMesas(response.data);
-        } catch (error) {
-            console.error('Error al obtener mesas:', error);
-        }
-    };
+    
 
     const limpiarFormulario = () => {
         setFormData({
             cliente: null,
-            mesa: null,
+           
             estado: '0'
         });
     };
@@ -143,23 +131,7 @@ const PedidoForm = () => {
                                 ))}
                             </select>
                         </div>
-                        <div className="mb-3">
-                            <label htmlFor="idMesa" className="form-label">Mesa</label>
-                            <select
-                                className="form-select"
-                                name="idMesa"
-                                value={formData.mesa ? formData.mesa.id : ""}
-                                onChange={handleChange}
-                                required
-                            >
-                                <option value="">Seleccionar mesa</option>
-                                {mesas.filter(mesa => mesa.disponibilidad === true).map(filteredMesa => (
-                                    <option key={filteredMesa.id} value={filteredMesa.id}>
-                                        {filteredMesa.id}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
+                        
                         <div className="mb-3">
                             <label htmlFor="estado" className="form-label">
                                 Estado
@@ -184,4 +156,4 @@ const PedidoForm = () => {
     );
 };
 
-export default PedidoForm;
+export default DomicilioForm;

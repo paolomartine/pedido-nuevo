@@ -37,6 +37,7 @@ function Table() {
 
     const update = async () => {
         try {
+            console.log(id, disponibilidad)
             await axios.put("http://localhost:8085/api/v1/mesas", {
                 id,
                 disponibilidad,
