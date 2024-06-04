@@ -99,7 +99,7 @@ const OrderForm = () => {
 
     const limpiarproycantidad = () => {
         setFormData({
-            pedido: formData.pedido.id,
+            pedido: formData.pedido,
             producto: null,
             cantidad: 0
         });
@@ -177,4 +177,6 @@ const OrderForm = () => {
     );
 };
 
-export default OrderForm;
+export default OrderForm; 
+
+
