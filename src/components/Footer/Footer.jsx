@@ -5,7 +5,7 @@ import myLogo from './logoempacadora.png';
 
 const Footer = () => {
   return (
-    <footer style={{ backgroundColor: 'yellow', padding: '20px' }}>     
+    <footer style={{ backgroundColor: 'yellow', padding: '20px',  marginTop: '180px'}}>     
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         {/* Columna 1 */}
         <div style={{ display: 'flex', flexDirection: 'column' }}>
