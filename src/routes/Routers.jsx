@@ -12,7 +12,7 @@ import TablePedido from '../pages/TablePedido';
 import DomicilioForm from '../pages/DomicilioForm';
 import OrderForm from '../pages/OrderForm';
 import PedidoForm from '../pages/PedidoForm'
-
+import Despachados from '../pages/Despachados';
 
 
 
@@ -30,7 +30,7 @@ const Routers = () => {
     <Route path="/domicilios" element={<DomicilioForm />} /> 
     <Route path="/detallepedido" element={<OrderForm />} />
     <Route path="/pedido" element={<PedidoForm />} />
-
+    <Route path="/despachados" element={<Despachados />} />
     
   </Routes>
 

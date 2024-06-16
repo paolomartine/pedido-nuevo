@@ -80,7 +80,7 @@ const DetallePedido = () => {
         const fetchPedidos = async () => {
             try {
                 const response = await axios.get("http://localhost:8085/api/v1/pedidos");
-                const filteredPedidos = response.data.filter(pedido => pedido.estado === "PEDIDO");
+                const filteredPedidos = response.data.filter(pedido => pedido.estado === "DESPACHADO");
                 setPedidos(filteredPedidos);
                 setLoadingPedidos(false);
             } catch (error) {
@@ -163,14 +163,14 @@ const DetallePedido = () => {
             // Actualizar el estado del pedido a "DESPACHADO"
             const updatedPedido = {
                 ...pedidoData,
-                estado: 'DESPACHADO',
+                estado: 'PAGADO',
             };
             await axios.put(`http://localhost:8085/api/v1/pedidos`, updatedPedido);
 
             // Actualizar la disponibilidad de la mesa a true
             const updatedMesa = {
                 ...pedidoData.id_mesa,
-                disponibilidad: false,
+                disponibilidad: true,
             };
             await axios.put(`http://localhost:8085/api/v1/mesas`, updatedMesa);
 
@@ -216,7 +216,7 @@ const DetallePedido = () => {
             <div style={{ marginTop: '5%', textAlign: 'center', marginBottom: '5%' }}>
                 <Stack direction="row" spacing={20}>
                     <Button variant="contained" disabled={!isAnyRowSelected} onClick={handleDespachar}>
-                        Despachar
+                        Pagar
                     </Button>
                 </Stack>
             </div>
@@ -253,7 +253,7 @@ const DetallePedido = () => {
                         onClick={handleModalDespachar}
                         disabled={checkedProductos.length !== selectedPedido.length}
                     >
-                        Despachar
+                        Pagar
                     </Button>
                 </Box>
             </Modal>

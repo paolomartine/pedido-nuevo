@@ -4,6 +4,8 @@ import mylogo from './logoempacadora.png';
 import Button from '@mui/material/Button';
 import { Link } from 'react-router-dom';
 
+import "bootstrap/dist/css/bootstrap.min.css";
+
 
 const Header = ({ brand }) => {
   return (
@@ -29,6 +31,9 @@ const Header = ({ brand }) => {
         </Button>
         <Button component={Link} to="/pedidos" variant="contained" style={{ marginBottom: '16px' }}>
           Pedidos
+        </Button>
+        <Button component={Link} to="/despachados" variant="contained" style={{ marginBottom: '16px' }}>
+          Despachados
         </Button>
       </Container>
 
