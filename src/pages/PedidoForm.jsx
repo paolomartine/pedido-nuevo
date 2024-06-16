@@ -135,10 +135,10 @@ const PedidoForm = () => {
                                 onChange={handleChange}
                                 required
                             >
-                                <option value="">Seleccionar cliente</option>
-                                {clientes.map((cliente) => (
-                                    <option key={cliente.id} value={cliente.id}>
-                                        {cliente.nombre}
+                                <option value="">Seleccionar mesero</option>
+                                {clientes.filter(cliente => cliente.nombre === "Mesero1"||cliente.nombre ==="Mesero2").map(filteredCliente => (
+                                    <option key={filteredCliente.id} value={filteredCliente.id}>
+                                        {filteredCliente.nombre}                                
                                     </option>
                                 ))}
                             </select>

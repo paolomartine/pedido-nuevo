@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { DataGrid } from '@mui/x-data-grid';
+
 import { Typography, Stack, Box, Modal, List, ListItem, ListItemText, Checkbox } from '@mui/material';
 import Swal from 'sweetalert2';
 import { Button } from "react-bootstrap";
@@ -145,18 +145,7 @@ const Ventas = () => {
                     {producto}: {ventasPorProducto[producto]}
                 </Typography>
             ))}
-            <DataGrid
-                rows={rows}
-                columns={columns}
-                getRowHeight={() => 'auto'}
-                initialState={{
-                    pagination: {
-                        paginationModel: { page: 0, pageSize: 5 }
-                    },
-                }}
-                pageSizeOptions={[5, 10]}
-                checkboxSelection
-            />
+            
         </div>
     );
 };
