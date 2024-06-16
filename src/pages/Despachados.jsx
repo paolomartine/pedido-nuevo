@@ -43,7 +43,7 @@ const modalStyle = {
     p: 4,
 };
 
-const DetallePedido = () => {
+const Despachados = () => {
     const [isAnyRowSelected, setIsAnyRowSelected] = useState(false);
     const [selectedRowsData, setSelectedRowsData] = useState([]);
     const [selectedPedido, setSelectedPedido] = useState([]);
@@ -261,4 +261,4 @@ const DetallePedido = () => {
     );
 };
 
-export default DetallePedido;
+export default Despachados;

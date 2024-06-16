@@ -44,37 +44,14 @@ const modalStyle = {
 };
 
 const Ventas = () => {
-    const [isAnyRowSelected, setIsAnyRowSelected] = useState(false);
-    const [selectedRowsData, setSelectedRowsData] = useState([]);
-    const [selectedPedido, setSelectedPedido] = useState([]);
-    const [checkedProductos, setCheckedProductos] = useState([]);
     const [pedidos, setPedidos] = useState([]);
     const [rows, setRows] = useState([]);
     const [loadingPedidos, setLoadingPedidos] = useState(true);
     const [loadingProductos, setLoadingProductos] = useState(false);
     const [errorPedidos, setErrorPedidos] = useState(null);
     const [errorProductos, setErrorProductos] = useState(null);
-    const [open, setOpen] = useState(false);
-
-    const handleOpen = () => setOpen(true);
-    const handleClose = () => {
-        setOpen(false);
-        setCheckedProductos([]);
-        localStorage.removeItem('selectedProductos');
-    };
-
-    const onRowsSelectionHandler = (ids) => {
-        const selectedData = ids
-            .map((id) => rows.find((row) => row.id === id))
-            .filter((row) => row !== undefined);
-
-        setIsAnyRowSelected(ids.length > 0);
-        setSelectedRowsData(selectedData);
-    };
-
-    useEffect(() => {
-        console.log(selectedRowsData);
-    }, [selectedRowsData]);
+    const [ventaTotal, setVentaTotal] = useState(0);
+    const [ventasPorProducto, setVentasPorProducto] = useState({});
 
     useEffect(() => {
         const fetchPedidos = async () => {
@@ -91,7 +68,6 @@ const Ventas = () => {
         fetchPedidos();
     }, []);
 
-   
     const fetchProductos = async (pedidoId) => {
         try {
             const response = await axios.get(`http://localhost:8085/api/v1/detallepedidos/${pedidoId}/productos`);
@@ -105,6 +81,9 @@ const Ventas = () => {
     useEffect(() => {
         const generateRows = async () => {
             setLoadingProductos(true);
+            let ventaTotalTemp = 0;
+            const ventasPorProductoTemp = {};
+
             const rows = await Promise.all(
                 pedidos.map(async (pedido) => {
                     const productosData = await fetchProductos(pedido.id);
@@ -112,7 +91,18 @@ const Ventas = () => {
                         producto: producto.precio,
                         cantidad: producto.cantidad,
                     }));
+
                     const total = productosData.reduce((sum, producto) => sum + (producto.descripcion * producto.cantidad), 0);
+                    ventaTotalTemp += total;
+
+                    productosData.forEach((producto) => {
+                        if (ventasPorProductoTemp[producto.precio]) {
+                            ventasPorProductoTemp[producto.precio] += producto.cantidad;
+                        } else {
+                            ventasPorProductoTemp[producto.precio] = producto.cantidad;
+                        }
+                    });
+
                     return {
                         id: pedido.id,
                         pedidos: pedidosFormat,
@@ -122,7 +112,10 @@ const Ventas = () => {
                     };
                 })
             );
+
             setRows(rows);
+            setVentaTotal(ventaTotalTemp);
+            setVentasPorProducto(ventasPorProductoTemp);
             setLoadingProductos(false);
         };
 
@@ -130,65 +123,6 @@ const Ventas = () => {
             generateRows();
         }
     }, [pedidos]);
-
-    const handleDespachar = async () => {
-        if (selectedRowsData.length > 0) {
-            const productos = await fetchProductos(selectedRowsData[0].id);
-            setSelectedPedido(productos);
-            handleOpen();
-        }
-    };
-
-    const handleToggle = (producto) => () => {
-        const currentIndex = checkedProductos.indexOf(producto);
-        const newChecked = [...checkedProductos];
-
-        if (currentIndex === -1) {
-            newChecked.push(producto);
-        } else {
-            newChecked.splice(currentIndex, 1);
-        }
-
-        setCheckedProductos(newChecked);
-        localStorage.setItem('selectedProductos', JSON.stringify(newChecked));
-    };
-
-    const handleModalPagar = async () => {
-        const pedidoId = selectedRowsData[0].id;
-        try {
-            // Obtener los datos del pedido actual
-            const response = await axios.get(`http://localhost:8085/api/v1/pedidos/${pedidoId}`);
-            const pedidoData = response.data.data;
-
-            // Actualizar el estado del pedido a "PAGADO"
-            const updatedPedido = {
-                ...pedidoData,
-                estado: 'PAGADO',
-            };
-            await axios.put(`http://localhost:8085/api/v1/pedidos`, updatedPedido);
-
-            // Actualizar la disponibilidad de la mesa a true
-            const updatedMesa = {
-                ...pedidoData.id_mesa,
-                disponibilidad: true,
-            };
-            await axios.put(`http://localhost:8085/api/v1/mesas`, updatedMesa);
-
-            console.log("Productos PAGADOS:", checkedProductos);
-            handleClose();
-
-
-        } catch (error) {
-            console.error("Error despachando productos:", error);
-        }
-    };
-
-    useEffect(() => {
-        const savedCheckedProductos = JSON.parse(localStorage.getItem('selectedProductos'));
-        if (savedCheckedProductos) {
-            setCheckedProductos(savedCheckedProductos);
-        }
-    }, [open]);
 
     if (loadingPedidos) return <div>Cargando pedidos...</div>;
     if (errorPedidos) return <div>Error cargando pedidos: {errorPedidos.message}</div>;
@@ -200,6 +134,17 @@ const Ventas = () => {
             <Typography variant="h6" gutterBottom>
                 Ventas
             </Typography>
+            <Typography variant="h6" gutterBottom>
+                Total de ventas: {ventaTotal}
+            </Typography>
+            <Typography variant="h6" gutterBottom>
+                Ventas por Producto:
+            </Typography>
+            {Object.keys(ventasPorProducto).map((producto) => (
+                <Typography key={producto} variant="body1" gutterBottom>
+                    {producto}: {ventasPorProducto[producto]}
+                </Typography>
+            ))}
             <DataGrid
                 rows={rows}
                 columns={columns}
@@ -210,10 +155,8 @@ const Ventas = () => {
                     },
                 }}
                 pageSizeOptions={[5, 10]}
-                onRowSelectionModelChange={(ids) => onRowsSelectionHandler(ids)}
                 checkboxSelection
             />
-                        
         </div>
     );
 };
