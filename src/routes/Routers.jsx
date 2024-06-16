@@ -13,6 +13,8 @@ import DomicilioForm from '../pages/DomicilioForm';
 import OrderForm from '../pages/OrderForm';
 import PedidoForm from '../pages/PedidoForm'
 import Despachados from '../pages/Despachados';
+import Ventas from '../pages/Ventas';
+import Sales from '../pages/Sales';
 
 
 
@@ -20,8 +22,7 @@ const Routers = () => {
   return <Routes>
     <Route path="/" element={<Menu />} />   
     <Route path="/pedidonuevo" element={<PedidoNuevo />} />
-    <Route path="/menu" element={<Menu />} />
-      
+    <Route path="/menu" element={<Menu />} />      
     <Route path="/mesas" element={<Table />} />
     <Route path="/editar" element={<Edit />} />
     <Route path="/clientes" element={<User />} />
@@ -31,6 +32,7 @@ const Routers = () => {
     <Route path="/detallepedido" element={<OrderForm />} />
     <Route path="/pedido" element={<PedidoForm />} />
     <Route path="/despachados" element={<Despachados />} />
+    <Route path="/ventas" element={<Ventas />} />
     
   </Routes>
 

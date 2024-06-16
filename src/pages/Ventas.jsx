@@ -43,7 +43,7 @@ const modalStyle = {
     p: 4,
 };
 
-const DetallePedido = () => {
+const Ventas = () => {
     const [isAnyRowSelected, setIsAnyRowSelected] = useState(false);
     const [selectedRowsData, setSelectedRowsData] = useState([]);
     const [selectedPedido, setSelectedPedido] = useState([]);
@@ -80,7 +80,7 @@ const DetallePedido = () => {
         const fetchPedidos = async () => {
             try {
                 const response = await axios.get("http://localhost:8085/api/v1/pedidos");
-                const filteredPedidos = response.data.filter(pedido => pedido.estado === "DESPACHADO");
+                const filteredPedidos = response.data.filter(pedido => pedido.estado === "PAGADO");
                 setPedidos(filteredPedidos);
                 setLoadingPedidos(false);
             } catch (error) {
@@ -198,7 +198,7 @@ const DetallePedido = () => {
     return (
         <div style={{ height: 400, width: '80%', marginLeft: '10%', marginTop: '2%', marginBottom: '10%' }}>
             <Typography variant="h6" gutterBottom>
-                Pedidos
+                Ventas
             </Typography>
             <DataGrid
                 rows={rows}
@@ -213,52 +213,9 @@ const DetallePedido = () => {
                 onRowSelectionModelChange={(ids) => onRowsSelectionHandler(ids)}
                 checkboxSelection
             />
-            <div style={{ marginTop: '5%', textAlign: 'center', marginBottom: '5%' }}>
-                <Stack direction="row" spacing={20}>
-                    <Button variant="contained" disabled={!isAnyRowSelected} onClick={handleDespachar}>
-                        Pagar
-                    </Button>
-                </Stack>
-            </div>
-            <Modal
-                open={open}
-                onClose={handleClose}
-                aria-labelledby="modal-modal-title"
-                aria-describedby="modal-modal-description"
-            >
-                <Box sx={modalStyle}>
-                    <Typography id="modal-modal-title" variant="h6" component="h2">
-                        Detalles del Despacho
-                    </Typography>
-                    <List>
-                        {selectedPedido && selectedPedido.map((producto, index) => (
-                            <ListItem key={index} onClick={handleToggle(producto)}>
-                                <Checkbox
-                                    edge="start"
-                                    checked={checkedProductos.indexOf(producto) !== -1}
-                                    tabIndex={-1}
-                                    disableRipple
-                                />
-                                <ListItemText
-                                    primary={`Producto: ${producto.precio} (Cantidad: ${producto.cantidad})`}
-                                    secondary={`Total: $${(producto.descripcion * producto.cantidad).toFixed(2)}`}
-                                />
-                            </ListItem>
-                        ))}
-                    </List>
-
-                    <Button
-                        variant="contained"
-                        color="primary"
-                        onClick={handleModalPagar}
-                        disabled={checkedProductos.length !== selectedPedido.length}
-                    >
-                        Pagar
-                    </Button>
-                </Box>
-            </Modal>
+                        
         </div>
     );
 };
 
-export default DetallePedido;
+export default Ventas;

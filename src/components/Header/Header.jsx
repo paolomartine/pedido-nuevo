@@ -35,6 +35,9 @@ const Header = ({ brand }) => {
         <Button component={Link} to="/despachados" variant="contained" style={{ marginBottom: '16px' }}>
           Despachados
         </Button>
+        <Button component={Link} to="/ventas" variant="contained" style={{ marginBottom: '16px' }}>
+          Ventas
+        </Button>
       </Container>
 
     </Box>
