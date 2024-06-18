@@ -28,6 +28,22 @@ const columns = [
     { field: 'destino', headerName: 'Destino', width: 210 },
     { field: 'estado', headerName: 'Estado', width: 210 },
     { field: 'total', headerName: 'Total', type: 'number', width: 120 },
+    { field: 'acciones', headerName: 'Acciones', width: 150,
+        renderCell: (params) => (
+            <div>
+            <span>
+                <Button
+                    onClick={() => {
+                        window.location.href = `/detallepedido`;
+                    }}
+                >
+                    Adicionar
+                </Button>
+            </span>
+        </div>
+        ),
+     },
+
 ];
 
 // Estilos para el modal

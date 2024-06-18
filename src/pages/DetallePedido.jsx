@@ -8,6 +8,8 @@ import "bootstrap/dist/css/bootstrap.min.css";
 
 // Definir las columnas del DataGrid
 const columns = [
+    
+
     { field: 'id', headerName: 'ID', width: 70, align: 'left' },
     {
         field: 'pedidos',
@@ -28,6 +30,21 @@ const columns = [
     { field: 'destino', headerName: 'Destino', width: 210 },
     { field: 'estado', headerName: 'Estado', width: 210 },
     { field: 'total', headerName: 'Total', type: 'number', width: 120 },
+    { field: 'acciones', headerName: 'Acciones', width: 150,
+        renderCell: (params) => (
+            <div>
+            <span>
+                <Button
+                    onClick={() => {
+                        window.location.href = `/detallepedido`;
+                    }}
+                >
+                    Adicionar
+                </Button>
+            </span>
+        </div>
+        ),
+     },
 ];
 
 // Estilos para el modal
@@ -55,6 +72,7 @@ const DetallePedido = () => {
     const [errorPedidos, setErrorPedidos] = useState(null);
     const [errorProductos, setErrorProductos] = useState(null);
     const [open, setOpen] = useState(false);
+
 
     const handleOpen = () => setOpen(true);
     const handleClose = () => {
@@ -91,7 +109,7 @@ const DetallePedido = () => {
         fetchPedidos();
     }, []);
 
-   
+
     const fetchProductos = async (pedidoId) => {
         try {
             const response = await axios.get(
@@ -121,6 +139,7 @@ const DetallePedido = () => {
                         destino: `Mesa ${pedido.id_mesa.id}`,
                         estado: pedido.estado,
                         total: total,
+
                     };
                 })
             );

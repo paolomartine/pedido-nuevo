@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 import { Typography, Stack, Box, Modal, List, ListItem, ListItemText, Checkbox } from '@mui/material';
 import Swal from 'sweetalert2';
 import { Button } from "react-bootstrap";
@@ -129,6 +130,29 @@ const Ventas = () => {
     if (loadingProductos) return <div>Cargando productos...</div>;
     if (errorProductos) return <div>Error cargando productos: {errorProductos.message}</div>;
 
+    const generatePDF = () => {
+        const doc = new jsPDF();
+    
+        doc.text("Ventas", 20, 10);
+        doc.text(`Total de ventas: ${ventaTotal}`, 20, 20);
+        doc.text("Ventas por Producto:", 20, 30);
+    
+        const data = Object.keys(ventasPorProducto).map((producto, index) => [
+          index + 1,
+          producto,
+          ventasPorProducto[producto],
+        ]);
+    
+        doc.autoTable({
+          head: [['#', 'Producto', 'Ventas']],
+          body: data,
+          startY: 40,
+        });
+    
+        doc.save('reporte_ventas.pdf');
+      };
+
+
     return (
         <div style={{ height: 400, width: '80%', marginLeft: '10%', marginTop: '2%', marginBottom: '10%' }}>
             <Typography variant="h6" gutterBottom>
@@ -145,7 +169,9 @@ const Ventas = () => {
                     {producto}: {ventasPorProducto[producto]}
                 </Typography>
             ))}
-            
+            <Button variant="contained" color="primary" onClick={generatePDF}>
+                Reporte PDF
+            </Button>
         </div>
     );
 };
