@@ -18,7 +18,7 @@ const columns = [
                 {params.row.pedidos.map((pedido, index) => (
                     <span key={index}>
                         <Typography noWrap>
-                            {pedido.producto} ({pedido.cantidad})
+                            {pedido.producto} ({pedido.cantidad}) {pedido.observacion}
                         </Typography>
                     </span>
                 ))}
@@ -94,7 +94,8 @@ const DetallePedido = () => {
    
     const fetchProductos = async (pedidoId) => {
         try {
-            const response = await axios.get(`http://localhost:8085/api/v1/detallepedidos/${pedidoId}/productos`);
+            const response = await axios.get(
+                `http://localhost:8085/api/v1/detallepedidos/${pedidoId}/productos`);
             return response.data;
         } catch (error) {
             setErrorProductos(error);
@@ -109,10 +110,11 @@ const DetallePedido = () => {
                 pedidos.map(async (pedido) => {
                     const productosData = await fetchProductos(pedido.id);
                     const pedidosFormat = productosData.map((producto) => ({
-                        producto: producto.precio,
+                        producto: producto.nombre,
                         cantidad: producto.cantidad,
+                        observacion: producto.observacion,
                     }));
-                    const total = productosData.reduce((sum, producto) => sum + (producto.descripcion * producto.cantidad), 0);
+                    const total = productosData.reduce((sum, producto) => sum + (producto.precio * producto.cantidad), 0);
                     return {
                         id: pedido.id,
                         pedidos: pedidosFormat,
@@ -240,8 +242,8 @@ const DetallePedido = () => {
                                     disableRipple
                                 />
                                 <ListItemText
-                                    primary={`Producto: ${producto.precio} (Cantidad: ${producto.cantidad})`}
-                                    secondary={`Total: $${(producto.descripcion * producto.cantidad).toFixed(2)}`}
+                                    primary={`Producto: ${producto.nombre} (Cantidad: ${producto.cantidad}) (Observación: ${producto.observacion})`}
+                                    secondary={`Total: $${(producto.precio * producto.cantidad).toFixed(2)}`}
                                 />
                             </ListItem>
                         ))}

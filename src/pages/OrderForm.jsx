@@ -13,7 +13,8 @@ const OrderForm = () => {
     const [formData, setFormData] = useState({
         pedido: null,
         producto: null,
-        cantidad: 0
+        cantidad: 0,
+        observacion: ""
     });
 
     const navigate = useNavigate();
@@ -50,22 +51,25 @@ const OrderForm = () => {
         const id_pedido = formData.pedido
         const id_producto = formData.producto
         const cantidad = formData.cantidad
+        const observacion = formData.observacion
         try {
-            const response = await axios.post('http://localhost:8085/api/v1/detallepedidos', { 
-                id_pedido, 
-                id_producto, 
-                cantidad });
+            const response = await axios.post('http://localhost:8085/api/v1/detallepedidos', {
+                id_pedido,
+                id_producto,
+                cantidad,
+                observacion
+            });
             MySwal.fire({
                 title: "¿Quiéres pedir algo más?",
                 showDenyButton: true,
                 showCancelButton: true,
                 confirmButtonText: "Sí",
                 denyButtonText: "No"
-            }).then((result)  =>  {
-                if (result.isConfirmed)  {
-                    Swal.fire("Qué otro producto deseas?", "", "success"); 
-                     limpiarproycantidad();                    
-                     navigate("/detallepedido")   
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire("Qué otro producto deseas?", "", "success");
+                    limpiarproycantidad();
+                    navigate("/detallepedido")
                 } else if (result.isDenied) {
 
                     Swal.fire("Pedido terminado", "", "info");
@@ -101,7 +105,8 @@ const OrderForm = () => {
         setFormData({
             pedido: formData.pedido,
             producto: null,
-            cantidad: 0
+            cantidad: 0,
+            observacion: ""
         });
     };
 
@@ -109,7 +114,8 @@ const OrderForm = () => {
         setFormData({
             pedido: null,
             producto: null,
-            cantidad: 0
+            cantidad: 0,
+            observacion: ""
         });
     };
 
@@ -129,6 +135,7 @@ const OrderForm = () => {
                                 className="form-select"
                                 name="idPedido"
                                 value={formData.pedido ? formData.pedido.id : ""}
+                                
                                 onChange={handleChange}
                                 required
                             >
@@ -140,6 +147,7 @@ const OrderForm = () => {
                                 ))}
                             </select>
                         </div>
+
                         <div className="mb-3">
                             <label htmlFor="idProducto" className="form-label">Producto</label>
                             <select
@@ -169,6 +177,18 @@ const OrderForm = () => {
                                 required
                             />
                         </div>
+
+                        <div className="mb-3">
+                            <label htmlFor="cantidad" className="form-label">Observación<noscript></noscript></label>
+                            <input
+                                type="text"
+                                className="form-control"
+                                id="observacion"
+                                name="observacion"
+                                value={formData.observacion}
+                                onChange={handleChange}
+                            /> </div>
+
                         <button type="submit" className="btn btn-primary">Enviar</button>
                     </form>
                 </div>
@@ -177,6 +197,6 @@ const OrderForm = () => {
     );
 };
 
-export default OrderForm; 
+export default OrderForm;
 
 

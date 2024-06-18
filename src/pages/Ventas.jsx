@@ -92,14 +92,14 @@ const Ventas = () => {
                         cantidad: producto.cantidad,
                     }));
 
-                    const total = productosData.reduce((sum, producto) => sum + (producto.descripcion * producto.cantidad), 0);
+                    const total = productosData.reduce((sum, producto) => sum + (producto.precio * producto.cantidad), 0);
                     ventaTotalTemp += total;
 
                     productosData.forEach((producto) => {
-                        if (ventasPorProductoTemp[producto.precio]) {
-                            ventasPorProductoTemp[producto.precio] += producto.cantidad;
+                        if (ventasPorProductoTemp[producto.nombre]) {
+                            ventasPorProductoTemp[producto.nombre] += producto.cantidad;
                         } else {
-                            ventasPorProductoTemp[producto.precio] = producto.cantidad;
+                            ventasPorProductoTemp[producto.nombre] = producto.cantidad;
                         }
                     });
 

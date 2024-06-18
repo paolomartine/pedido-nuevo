@@ -8,13 +8,13 @@ import User from '../pages/User'
 import Edit from '../pages/Edit'
 
 import DetallePedido from '../pages/DetallePedido';
-import TablePedido from '../pages/TablePedido';
+
 import DomicilioForm from '../pages/DomicilioForm';
 import OrderForm from '../pages/OrderForm';
 import PedidoForm from '../pages/PedidoForm'
 import Despachados from '../pages/Despachados';
 import Ventas from '../pages/Ventas';
-import Sales from '../pages/Sales';
+
 
 
 
@@ -26,8 +26,7 @@ const Routers = () => {
     <Route path="/mesas" element={<Table />} />
     <Route path="/editar" element={<Edit />} />
     <Route path="/clientes" element={<User />} />
-    <Route path="/pedidos" element={<DetallePedido />} /> 
-    <Route path="/mesapedidos" element={<TablePedido />} /> 
+    <Route path="/pedidos" element={<DetallePedido />} />     
     <Route path="/domicilios" element={<DomicilioForm />} /> 
     <Route path="/detallepedido" element={<OrderForm />} />
     <Route path="/pedido" element={<PedidoForm />} />

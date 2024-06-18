@@ -109,10 +109,10 @@ const Despachados = () => {
                 pedidos.map(async (pedido) => {
                     const productosData = await fetchProductos(pedido.id);
                     const pedidosFormat = productosData.map((producto) => ({
-                        producto: producto.precio,
+                        producto: producto.nombre,
                         cantidad: producto.cantidad,
                     }));
-                    const total = productosData.reduce((sum, producto) => sum + (producto.descripcion * producto.cantidad), 0);
+                    const total = productosData.reduce((sum, producto) => sum + (producto.precio * producto.cantidad), 0);
                     return {
                         id: pedido.id,
                         pedidos: pedidosFormat,
@@ -240,8 +240,8 @@ const Despachados = () => {
                                     disableRipple
                                 />
                                 <ListItemText
-                                    primary={`Producto: ${producto.precio} (Cantidad: ${producto.cantidad})`}
-                                    secondary={`Total: $${(producto.descripcion * producto.cantidad).toFixed(2)}`}
+                                    primary={`Producto: ${producto.nombre} (Cantidad: ${producto.cantidad})`}
+                                    secondary={`Total: $${(producto.precio * producto.cantidad)}`}
                                 />
                             </ListItem>
                         ))}
