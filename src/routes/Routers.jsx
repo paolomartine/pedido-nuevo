@@ -14,6 +14,7 @@ import OrderForm from '../pages/OrderForm';
 import PedidoForm from '../pages/PedidoForm'
 import Despachados from '../pages/Despachados';
 import Ventas from '../pages/Ventas';
+import OrderFormDom from '../pages/OrderFormDom';
 
 
 
@@ -29,6 +30,7 @@ const Routers = () => {
     <Route path="/pedidos" element={<DetallePedido />} />     
     <Route path="/domicilios" element={<DomicilioForm />} /> 
     <Route path="/detallepedido" element={<OrderForm />} />
+    <Route path="/detallepedidodom" element={<OrderFormDom />} />
     <Route path="/pedido" element={<PedidoForm />} />
     <Route path="/despachados" element={<Despachados />} />
     <Route path="/ventas" element={<Ventas />} />

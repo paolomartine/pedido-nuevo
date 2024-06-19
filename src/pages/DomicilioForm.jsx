@@ -12,10 +12,10 @@ const MySwal = withReactContent(Swal);
 const DomicilioForm = () => {
 
     const [clientes, setClientes] = useState([]);
-   
+
     const [formData, setFormData] = useState({
         cliente: null,
-        
+
         estado: '0'
     });
 
@@ -23,7 +23,7 @@ const DomicilioForm = () => {
 
     useEffect(() => {
         obtenerClientes();
-        
+
     }, []);
 
     const handleChange = (e) => {
@@ -34,7 +34,7 @@ const DomicilioForm = () => {
                 ...formData,
                 cliente: selectedCliente
             });
-        
+
         } else {
             setFormData({
                 ...formData,
@@ -48,43 +48,26 @@ const DomicilioForm = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         const id_cliente = formData.cliente
-        
+
         const estado = formData.estado
 
         try {
-            const response = await axios.post('http://localhost:8085/api/v1/pedidos', {
+            const response = await axios.post('http://localhost:8085/api/v1/domicilios', {
                 id_cliente,
-                
                 estado
             });
-            update();
             limpiarFormulario();
             MySwal.fire({
-                title: "El pedido ha empezado...",
+                title: "El domicilio ha empezado...",
                 text: "Escoge tus productos favoritos!",
                 icon: "burguer"
             });
-            navigate("/detallepedido")
+            navigate("/detallepedidodom")
             console.log('Response:', response.data);
         } catch (error) {
             console.error('Error sending data:', error);
         }
     };
-
-    const update = async () => {
-        const id = formData.mesa.id
-        const disponibilidad = (false)
-        console.log('Parametros:', id, disponibilidad);
-        try {
-            await axios.put('http://localhost:8085/api/v1/mesas', {
-                id, disponibilidad,
-            });
-            limpiarFormulario();
-        } catch (error) {
-            console.error(error);
-        }
-    };
-
 
 
     const obtenerClientes = async () => {
@@ -96,12 +79,12 @@ const DomicilioForm = () => {
         }
     };
 
-    
+
 
     const limpiarFormulario = () => {
         setFormData({
             cliente: null,
-           
+
             estado: '0'
         });
     };
@@ -124,14 +107,20 @@ const DomicilioForm = () => {
                                 required
                             >
                                 <option value="">Seleccionar cliente</option>
-                                {clientes.map((cliente) => (
-                                    <option key={cliente.id} value={cliente.id}>
-                                        {cliente.nombre}
-                                    </option>
-                                ))}
+                                {clientes
+                                    .filter(cliente => cliente.nombre !== "Mesero1" && cliente.nombre !== "Mesero2")
+                                    .map((cliente) => (
+                                        <option key={cliente.id} value={cliente.id}>
+                                            {cliente.nombre}
+                                        </option>
+                                    ))}
                             </select>
+                            <button type="button" className="btn btn-primary" onClick={() => window.location.href = '/clientes'}>
+                                Crear nuevo cliente
+                            </button>
                         </div>
-                        
+
+
                         <div className="mb-3">
                             <label htmlFor="estado" className="form-label">
                                 Estado

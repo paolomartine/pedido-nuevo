@@ -153,6 +153,30 @@ const Ventas = () => {
       };
 
 
+      const generatePDFIndividual = async (pedidoId) => {
+        const doc = new jsPDF();
+    
+        doc.text(`Reporte de Pedido: ${pedidoId}`, 10, 10);
+        doc.text(`Total de ventas: ${ventaTotal}`, 10, 20);
+    
+        const tableColumn = ["Producto", "Ventas"];
+        const tableRows = [];
+    
+        Object.keys(ventasPorProducto).forEach(producto => {
+          const rowData = [
+            producto,
+            ventasPorProducto[producto]
+          ];
+          tableRows.push(rowData);
+        });
+    
+        doc.autoTable(tableColumn, tableRows, { startY: 30 });
+    
+        doc.save(`reporte_pedido_${pedidoId}.pdf`);
+
+
+}
+
     return (
         <div style={{ height: 400, width: '80%', marginLeft: '10%', marginTop: '2%', marginBottom: '10%' }}>
             <Typography variant="h6" gutterBottom>
@@ -169,8 +193,11 @@ const Ventas = () => {
                     {producto}: {ventasPorProducto[producto]}
                 </Typography>
             ))}
-            <Button variant="contained" color="primary" onClick={generatePDF}>
+            <Button className="btn btn-primary" variant="contained" color="primary" onClick={generatePDF}>
                 Reporte PDF
+            </Button>
+            <Button className="btn btn-primary" variant="contained" color="primary" onClick={generatePDFIndividual}>
+                Factura electrónica
             </Button>
         </div>
     );

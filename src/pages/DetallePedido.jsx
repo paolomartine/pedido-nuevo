@@ -8,7 +8,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 
 // Definir las columnas del DataGrid
 const columns = [
-    
+
 
     { field: 'id', headerName: 'ID', width: 70, align: 'left' },
     {
@@ -30,21 +30,22 @@ const columns = [
     { field: 'destino', headerName: 'Destino', width: 210 },
     { field: 'estado', headerName: 'Estado', width: 210 },
     { field: 'total', headerName: 'Total', type: 'number', width: 120 },
-    { field: 'acciones', headerName: 'Acciones', width: 150,
+    {
+        field: 'acciones', headerName: 'Acciones', width: 150,
         renderCell: (params) => (
             <div>
-            <span>
-                <Button
-                    onClick={() => {
-                        window.location.href = `/detallepedido`;
-                    }}
-                >
-                    Adicionar
-                </Button>
-            </span>
-        </div>
+                <span>
+                    <Button
+                        onClick={() => {
+                            window.location.href = `/detallepedido`;
+                        }}
+                    >
+                        Adicionar
+                    </Button>
+                </span>
+            </div>
         ),
-     },
+    },
 ];
 
 // Estilos para el modal
@@ -66,10 +67,13 @@ const DetallePedido = () => {
     const [selectedPedido, setSelectedPedido] = useState([]);
     const [checkedProductos, setCheckedProductos] = useState([]);
     const [pedidos, setPedidos] = useState([]);
+    const [domicilios, setDomicilios] = useState([]);
     const [rows, setRows] = useState([]);
     const [loadingPedidos, setLoadingPedidos] = useState(true);
+    const [loadingDomicilios, setLoadingDomicilios] = useState(true);
     const [loadingProductos, setLoadingProductos] = useState(false);
     const [errorPedidos, setErrorPedidos] = useState(null);
+    const [errorDomicilios, setErrorDomicilios] = useState(null);
     const [errorProductos, setErrorProductos] = useState(null);
     const [open, setOpen] = useState(false);
 
@@ -110,6 +114,22 @@ const DetallePedido = () => {
     }, []);
 
 
+    /* useEffect(() => {
+        const fetchDomicilios = async () => {
+            try {
+                const response = await axios.get("http://localhost:8085/api/v1/domicilios");
+                const filteredDomicilios = response.data.filter(domicilio => domicilio.estado === "PEDIDO");
+                setDomicilios(filteredDomicilios);
+                setLoadingDomicilios(false);
+            } catch (error) {
+                setErrorDomicilios(error);
+                setLoadingDomicilios(false);
+            }
+        };
+        fetchDomicilios();
+    }, []); */
+
+
     const fetchProductos = async (pedidoId) => {
         try {
             const response = await axios.get(
@@ -120,6 +140,29 @@ const DetallePedido = () => {
             return [];
         }
     };
+
+    /* const fetchProductos = async (pedidoId, domicilioId) => {
+        try {
+            const [productosPedidoResponse, productosDomicilioResponse] = await Promise.all([
+                axios.get(`http://localhost:8085/api/v1/detallepedidos/${pedidoId}/productos`),
+                axios.get(`http://localhost:8085/api/v1/detallepedidosdom/${domicilioId}/productos`)
+            ]);
+    
+            return {
+                productosPedido: productosPedidoResponse.data,
+                productosDomicilio: productosDomicilioResponse.data
+            };
+        } catch (error) {
+            setErrorProductos(error);
+            return {
+                productosPedido: [],
+                productosDomicilio: []
+            };
+        }
+    }; */
+
+
+
 
     useEffect(() => {
         const generateRows = async () => {
