@@ -8,17 +8,18 @@ import "bootstrap/dist/css/bootstrap.min.css";
 
 // Definir las columnas del DataGrid
 const columns = [
+
     { field: 'id', headerName: 'ID', width: 70, align: 'left' },
     {
-        field: 'pedidos',
-        headerName: 'Pedidos',
+        field: 'domicilios',
+        headerName: 'Domicilios',
         width: 300,
         renderCell: (params) => (
             <div>
-                {params.row.pedidos.map((pedido, index) => (
+                {params.row.domicilios.map((domicilio, index) => (
                     <span key={index}>
                         <Typography noWrap>
-                            {pedido.producto} ({pedido.cantidad}) {pedido.observacion}
+                            {domicilio.producto} ({domicilio.cantidad}) {domicilio.observacion}
                         </Typography>
                     </span>
                 ))}
@@ -35,7 +36,7 @@ const columns = [
                 <span>
                     <Button
                         onClick={() => {
-                            window.location.href = `/detallepedido`;
+                            window.location.href = `/detallepedidodom`;
                         }}
                     >
                         Adicionar
@@ -59,18 +60,18 @@ const modalStyle = {
     p: 4,
 };
 
-const DetallePedido = () => {
+const DomiciliosDespachados = () => {
     const [isAnyRowSelected, setIsAnyRowSelected] = useState(false);
     const [selectedRowsData, setSelectedRowsData] = useState([]);
-    const [selectedPedido, setSelectedPedido] = useState([]);
+    const [selectedDomicilio, setSelectedDomicilio] = useState([]);
     const [checkedProductos, setCheckedProductos] = useState([]);
-    const [pedidos, setPedidos] = useState([]);
     const [domicilios, setDomicilios] = useState([]);
+
     const [rows, setRows] = useState([]);
-    const [loadingPedidos, setLoadingPedidos] = useState(true);
     const [loadingDomicilios, setLoadingDomicilios] = useState(true);
+
     const [loadingProductos, setLoadingProductos] = useState(false);
-    const [errorPedidos, setErrorPedidos] = useState(null);
+
     const [errorDomicilios, setErrorDomicilios] = useState(null);
     const [errorProductos, setErrorProductos] = useState(null);
     const [open, setOpen] = useState(false);
@@ -97,26 +98,10 @@ const DetallePedido = () => {
     }, [selectedRowsData]);
 
     useEffect(() => {
-        const fetchPedidos = async () => {
-            try {
-                const response = await axios.get("http://localhost:8085/api/v1/pedidos");
-                const filteredPedidos = response.data.filter(pedido => pedido.estado === "PEDIDO");
-                setPedidos(filteredPedidos);
-                setLoadingPedidos(false);
-            } catch (error) {
-                setErrorPedidos(error);
-                setLoadingPedidos(false);
-            }
-        };
-        fetchPedidos();
-    }, []);
-
-
-    /* useEffect(() => {
         const fetchDomicilios = async () => {
             try {
                 const response = await axios.get("http://localhost:8085/api/v1/domicilios");
-                const filteredDomicilios = response.data.filter(domicilio => domicilio.estado === "PEDIDO");
+                const filteredDomicilios = response.data.filter(domicilio => domicilio.estado === "DESPACHADO");
                 setDomicilios(filteredDomicilios);
                 setLoadingDomicilios(false);
             } catch (error) {
@@ -125,13 +110,12 @@ const DetallePedido = () => {
             }
         };
         fetchDomicilios();
-    }, []); */
+    }, []);
 
-
-    const fetchProductos = async (pedidoId) => {
+    const fetchProductos = async (domicilioId) => {
         try {
             const response = await axios.get(
-                `http://localhost:8085/api/v1/detallepedidos/${pedidoId}/productos`);
+                `http://localhost:8085/api/v1/detallepedidosdom/${domicilioId}/productos`);
             return response.data;
         } catch (error) {
             setErrorProductos(error);
@@ -139,48 +123,24 @@ const DetallePedido = () => {
         }
     };
 
-    /* const fetchProductos = async (pedidoId, domicilioId) => {
-        try {
-            const [productosPedidoResponse, productosDomicilioResponse] = await Promise.all([
-                axios.get(`http://localhost:8085/api/v1/detallepedidos/${pedidoId}/productos`),
-                axios.get(`http://localhost:8085/api/v1/detallepedidosdom/${domicilioId}/productos`)
-            ]);
-    
-            return {
-                productosPedido: productosPedidoResponse.data,
-                productosDomicilio: productosDomicilioResponse.data
-            };
-        } catch (error) {
-            setErrorProductos(error);
-            return {
-                productosPedido: [],
-                productosDomicilio: []
-            };
-        }
-    }; */
-
-
-
-
     useEffect(() => {
         const generateRows = async () => {
             setLoadingProductos(true);
             const rows = await Promise.all(
-                pedidos.map(async (pedido) => {
-                    const productosData = await fetchProductos(pedido.id);
-                    const pedidosFormat = productosData.map((producto) => ({
+                domicilios.map(async (domicilio) => {
+                    const productosData = await fetchProductos(domicilio.id);
+                    const domiciliosFormat = productosData.map((producto) => ({
                         producto: producto.nombre,
                         cantidad: producto.cantidad,
                         observacion: producto.observacion,
                     }));
                     const total = productosData.reduce((sum, producto) => sum + (producto.precio * producto.cantidad), 0);
                     return {
-                        id: pedido.id,
-                        pedidos: pedidosFormat,
-                        destino: `Mesa ${pedido.id_mesa.id}`,
-                        estado: pedido.estado,
+                        id: domicilio.id,
+                        domicilios: domiciliosFormat,
+                        destino: domicilio.id_cliente.direccion,
+                        estado: domicilio.estado,
                         total: total,
-
                     };
                 })
             );
@@ -188,15 +148,15 @@ const DetallePedido = () => {
             setLoadingProductos(false);
         };
 
-        if (pedidos.length > 0) {
+        if (domicilios.length > 0) {
             generateRows();
         }
-    }, [pedidos]);
+    }, [domicilios]);
 
     const handleDespachar = async () => {
         if (selectedRowsData.length > 0) {
             const productos = await fetchProductos(selectedRowsData[0].id);
-            setSelectedPedido(productos);
+            setSelectedDomicilio(productos);
             handleOpen();
         }
     };
@@ -216,29 +176,20 @@ const DetallePedido = () => {
     };
 
     const handleModalDespachar = async () => {
-        const pedidoId = selectedRowsData[0].id;
+        const domicilioId = selectedRowsData[0].id;
         try {
-            // Obtener los datos del pedido actual
-            const response = await axios.get(`http://localhost:8085/api/v1/pedidos/${pedidoId}`);
-            const pedidoData = response.data.data;
+            // Obtener los datos del domicilio actual
+            const response = await axios.get(`http://localhost:8085/api/v1/domicilios/${domicilioId}`);
+            const domicilioData = response.data.data;
 
-            // Actualizar el estado del pedido a "DESPACHADO"
-            const updatedPedido = {
-                ...pedidoData,
-                estado: 'DESPACHADO',
+            // Actualizar el estado del domicilio a "PAGADO"
+            const updatedDomicilio = {
+                ...domicilioData,
+                estado: 'PAGADO',
             };
-            await axios.put(`http://localhost:8085/api/v1/pedidos`, updatedPedido);
+            await axios.put(`http://localhost:8085/api/v1/domicilios`, updatedDomicilio);
 
-            // Actualizar la disponibilidad de la mesa a true
-            const updatedMesa = {
-                ...pedidoData.id_mesa,
-                disponibilidad: false,
-            };
-            await axios.put(`http://localhost:8085/api/v1/mesas`, updatedMesa);
-
-            console.log("Productos despachados:", checkedProductos);
             handleClose();
-
 
         } catch (error) {
             console.error("Error despachando productos:", error);
@@ -252,15 +203,15 @@ const DetallePedido = () => {
         }
     }, [open]);
 
-    if (loadingPedidos) return <div>Cargando pedidos...</div>;
-    if (errorPedidos) return <div>Error cargando pedidos: {errorPedidos.message}</div>;
+    if (loadingDomicilios) return <div>Cargando domicilios...</div>;
+    if (errorDomicilios) return <div>Error cargando domicilios: {errorDomicilios.message}</div>;
     if (loadingProductos) return <div>Cargando productos...</div>;
     if (errorProductos) return <div>Error cargando productos: {errorProductos.message}</div>;
 
     return (
         <div style={{ height: 400, width: '80%', marginLeft: '10%', marginTop: '2%', marginBottom: '10%' }}>
             <Typography variant="h6" gutterBottom>
-                Pedidos
+                Domicilios
             </Typography>
             <DataGrid
                 rows={rows}
@@ -290,10 +241,10 @@ const DetallePedido = () => {
             >
                 <Box sx={modalStyle}>
                     <Typography id="modal-modal-title" variant="h6" component="h2">
-                        Detalles del Pedido
+                        Detalles del Domicilio
                     </Typography>
                     <List>
-                        {selectedPedido && selectedPedido.map((producto, index) => (
+                        {selectedDomicilio && selectedDomicilio.map((producto, index) => (
                             <ListItem key={index} onClick={handleToggle(producto)}>
                                 <Checkbox
                                     edge="start"
@@ -313,9 +264,9 @@ const DetallePedido = () => {
                         variant="contained"
                         color="primary"
                         onClick={handleModalDespachar}
-                        disabled={checkedProductos.length !== selectedPedido.length}
+                        disabled={checkedProductos.length !== selectedDomicilio.length}
                     >
-                        Despachar
+                        Pagar
                     </Button>
                 </Box>
             </Modal>
@@ -323,4 +274,4 @@ const DetallePedido = () => {
     );
 };
 
-export default DetallePedido;
+export default DomiciliosDespachados;

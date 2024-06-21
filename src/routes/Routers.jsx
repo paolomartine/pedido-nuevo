@@ -15,8 +15,10 @@ import PedidoForm from '../pages/PedidoForm'
 import Despachados from '../pages/Despachados';
 import Ventas from '../pages/Ventas';
 import OrderFormDom from '../pages/OrderFormDom';
+import DetallePedidoDom from '../pages/DetallePedidoDom';
+import DomiciliosDespachados from '../pages/DomiciliosDespachados';
 
-
+import Prueba1 from '../pages/Prueba1';
 
 
 const Routers = () => {
@@ -34,7 +36,9 @@ const Routers = () => {
     <Route path="/pedido" element={<PedidoForm />} />
     <Route path="/despachados" element={<Despachados />} />
     <Route path="/ventas" element={<Ventas />} />
-    
+    <Route path="/domicili" element={<DetallePedidoDom />} />
+    <Route path="/envios" element={<DomiciliosDespachados />} />
+    <Route path="/prueba" element={<Prueba1 />} />
   </Routes>
 
 }
