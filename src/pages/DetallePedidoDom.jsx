@@ -5,11 +5,12 @@ import { Typography, Stack, Box, Modal, List, ListItem, ListItemText, Checkbox }
 import Swal from 'sweetalert2';
 import { Button } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
+import { useNavigate } from "react-router-dom";
 
 // Definir las columnas del DataGrid
 const columns = [
 
-    { field: 'id', headerName: 'ID', width: 70, align: 'left' },
+    //{ field: 'id', headerName: 'ID', width: 70, align: 'left' },
     {
         field: 'domicilios',
         headerName: 'Domicilios',
@@ -76,6 +77,7 @@ const DetallePedidoDom = () => {
     const [errorProductos, setErrorProductos] = useState(null);
     const [open, setOpen] = useState(false);
 
+const navigate = useNavigate();
 
     const handleOpen = () => setOpen(true);
     const handleClose = () => {
@@ -194,6 +196,7 @@ const DetallePedidoDom = () => {
         } catch (error) {
             console.error("Error despachando productos:", error);
         }
+        navigate("/envios")
     };
 
     useEffect(() => {

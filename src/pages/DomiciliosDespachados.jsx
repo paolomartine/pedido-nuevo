@@ -5,11 +5,12 @@ import { Typography, Stack, Box, Modal, List, ListItem, ListItemText, Checkbox }
 import Swal from 'sweetalert2';
 import { Button } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
+import { useNavigate } from "react-router-dom";
 
 // Definir las columnas del DataGrid
 const columns = [
 
-    { field: 'id', headerName: 'ID', width: 70, align: 'left' },
+    //{ field: 'id', headerName: 'ID', width: 70, align: 'left' },
     {
         field: 'domicilios',
         headerName: 'Domicilios',
@@ -34,13 +35,7 @@ const columns = [
         renderCell: (params) => (
             <div>
                 <span>
-                    <Button
-                        onClick={() => {
-                            window.location.href = `/detallepedidodom`;
-                        }}
-                    >
-                        Adicionar
-                    </Button>
+
                 </span>
             </div>
         ),
@@ -76,7 +71,7 @@ const DomiciliosDespachados = () => {
     const [errorProductos, setErrorProductos] = useState(null);
     const [open, setOpen] = useState(false);
 
-
+    const navigate = useNavigate;
     const handleOpen = () => setOpen(true);
     const handleClose = () => {
         setOpen(false);
@@ -194,6 +189,7 @@ const DomiciliosDespachados = () => {
         } catch (error) {
             console.error("Error despachando productos:", error);
         }
+        navigate("/prueba")
     };
 
     useEffect(() => {
@@ -211,7 +207,7 @@ const DomiciliosDespachados = () => {
     return (
         <div style={{ height: 400, width: '80%', marginLeft: '10%', marginTop: '2%', marginBottom: '10%' }}>
             <Typography variant="h6" gutterBottom>
-                Domicilios
+                Domicilios en entrega
             </Typography>
             <DataGrid
                 rows={rows}
@@ -229,7 +225,7 @@ const DomiciliosDespachados = () => {
             <div style={{ marginTop: '5%', textAlign: 'center', marginBottom: '5%' }}>
                 <Stack direction="row" spacing={20}>
                     <Button variant="contained" disabled={!isAnyRowSelected} onClick={handleDespachar}>
-                        Despachar
+                        Pagar
                     </Button>
                 </Stack>
             </div>

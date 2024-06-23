@@ -5,13 +5,13 @@ import { Typography, Stack, Box, Modal, List, ListItem, ListItemText, Checkbox }
 import Swal from 'sweetalert2';
 import { Button } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
-
+import { useNavigate } from "react-router-dom";
 // Definir las columnas del DataGrid
 const columns = [
-    { field: 'id', headerName: 'ID', width: 70, align: 'left' },
+    //{ field: 'id', headerName: 'ID', width: 70, align: 'left' },
     {
         field: 'pedidos',
-        headerName: 'Pedidos',
+        headerName: 'Despachados',
         width: 300,
         renderCell: (params) => (
             <div>
@@ -72,11 +72,14 @@ const Despachados = () => {
     const [errorProductos, setErrorProductos] = useState(null);
     const [open, setOpen] = useState(false);
 
+    const navigate = useNavigate();
+
     const handleOpen = () => setOpen(true);
     const handleClose = () => {
         setOpen(false);
         setCheckedProductos([]);
         localStorage.removeItem('selectedProductos');
+        navigate("/ventas")
     };
 
     const onRowsSelectionHandler = (ids) => {
@@ -152,6 +155,7 @@ const Despachados = () => {
             const productos = await fetchProductos(selectedRowsData[0].id);
             setSelectedPedido(productos);
             handleOpen();
+            
         }
     };
 
@@ -192,11 +196,12 @@ const Despachados = () => {
 
             console.log("Productos PAGADOS:", checkedProductos);
             handleClose();
-
+            
 
         } catch (error) {
             console.error("Error despachando productos:", error);
         }
+        navigate("/prueba")
     };
 
     useEffect(() => {
@@ -214,7 +219,7 @@ const Despachados = () => {
     return (
         <div style={{ height: 400, width: '80%', marginLeft: '10%', marginTop: '2%', marginBottom: '10%' }}>
             <Typography variant="h6" gutterBottom>
-                Pedidos
+                Despachados en mesas
             </Typography>
             <DataGrid
                 rows={rows}

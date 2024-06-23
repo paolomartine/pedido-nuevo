@@ -5,10 +5,11 @@ import { Typography, Stack, Box, Modal, List, ListItem, ListItemText, Checkbox }
 import Swal from 'sweetalert2';
 import { Button } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
+import { useNavigate } from "react-router-dom";
 
 // Definir las columnas del DataGrid
 const columns = [
-    { field: 'id', headerName: 'ID', width: 70, align: 'left' },
+    //{ field: 'id', headerName: 'ID', width: 70, align: 'left' },
     {
         field: 'pedidos',
         headerName: 'Pedidos',
@@ -59,6 +60,8 @@ const modalStyle = {
     p: 4,
 };
 
+
+
 const DetallePedido = () => {
     const [isAnyRowSelected, setIsAnyRowSelected] = useState(false);
     const [selectedRowsData, setSelectedRowsData] = useState([]);
@@ -75,12 +78,14 @@ const DetallePedido = () => {
     const [errorProductos, setErrorProductos] = useState(null);
     const [open, setOpen] = useState(false);
 
+    const navigate = useNavigate();
 
     const handleOpen = () => setOpen(true);
     const handleClose = () => {
         setOpen(false);
         setCheckedProductos([]);
         localStorage.removeItem('selectedProductos');
+        navigate("/despachados")
     };
 
     const onRowsSelectionHandler = (ids) => {
