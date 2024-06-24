@@ -9,6 +9,7 @@ import { useNavigate } from "react-router-dom";
 
 // Definir las columnas del DataGrid
 const columns = [
+    
 
     //{ field: 'id', headerName: 'ID', width: 70, align: 'left' },
     {
@@ -28,10 +29,30 @@ const columns = [
         ),
     },
     { field: 'destino', headerName: 'Destino', width: 210 },
-    { field: 'estado', headerName: 'Estado', width: 210 },
-    { field: 'total', headerName: 'Total', type: 'number', width: 120 },
     {
-        field: 'acciones', headerName: 'Acciones', width: 150,
+        field: 'cliente',
+        headerName: 'Cliente',
+        width: 200,
+        renderCell: (params) => (
+            <div>
+                {params.row.domicilios.map((domicilio, index) => (
+                    <span key={index}>
+                        <Typography noWrap>
+                        
+                           ( {domicilio.id_cliente} ) 
+                           
+                        </Typography>
+                    </span>
+                ))}
+            </div>
+        ),
+    },
+    
+    ,
+    { field: 'estado', headerName: 'Estado', width: 100 },
+    { field: 'total', headerName: 'Total', type: 'number', width: 120, align: 'right' },
+    {
+        field: 'acciones', headerName: 'Acciones', width: 150, align: 'right',
         renderCell: (params) => (
             <div>
                 <span>
@@ -45,7 +66,9 @@ const columns = [
                 </span>
             </div>
         ),
+        
     },
+    
 ];
 
 // Estilos para el modal
@@ -135,12 +158,14 @@ const navigate = useNavigate();
                         producto: producto.nombre,
                         cantidad: producto.cantidad,
                         observacion: producto.observacion,
+                        
                     }));
                     const total = productosData.reduce((sum, producto) => sum + (producto.precio * producto.cantidad), 0);
                     return {
                         id: domicilio.id,
                         domicilios: domiciliosFormat,
                         destino: domicilio.id_cliente.direccion,
+                        cliente: domicilio.id_cliente.nombre,
                         estado: domicilio.estado,
                         total: total,
                     };
