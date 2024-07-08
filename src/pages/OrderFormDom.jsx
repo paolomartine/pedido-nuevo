@@ -189,6 +189,23 @@ const OrderFormDom = () => {
                                 onChange={handleChange}
                             /> </div>
 
+<div className="mb-3">
+                            <label htmlFor="estado" className="form-label">
+                                Estado
+                            </label>
+                            <select
+                                id="estado"
+                                name="estado"
+                                className="form-select"
+                                value={formData.estado}
+                                onChange={handleChange}
+                                required >
+                                <option value={0}>Pedido</option>
+                                <option value={1}>Despachado</option>
+                                <option value={2}>Pagado</option>
+                            </select>
+                        </div>
+
                         <button type="submit" className="btn btn-primary">Enviar</button>
                     </form>
                 </div>

@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Button, ButtonGroup } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
-
 import Swal from 'sweetalert2'
 import withReactContent from 'sweetalert2-react-content'
 
@@ -12,9 +11,9 @@ function Edit() {
     const [id, setId] = useState();
     const [nombre, setNombre] = useState("");
     const [url, setUrl] = useState("");
-
     const [precio, setPrecio] = useState();
     const [descripcion, setDescripcion] = useState("");
+
     const [editar, setEditar] = useState(false);
     const [productosList, setProductos] = useState([]);
     const [precioError, setPrecioError] = useState(false);
@@ -52,13 +51,12 @@ function Edit() {
             });
             limpiarCampos();
         } else
-
             axios
                 .post("http://localhost:8085/api/v1/productos", {
                     nombre,
                     url,
                     precio,
-                   descripcion,
+                    descripcion,
                 })
                 .then(() => {
                     getProductos();
@@ -123,9 +121,7 @@ function Edit() {
         setId("");
         setDescripcion("");
         setPrecio("");
-
         setUrl("");
-
     }
 
     const editarProducto = (val) => {
@@ -133,7 +129,6 @@ function Edit() {
         setId(val.id);
         setNombre(val.nombre);
         setUrl(val.url);
-
         setDescripcion(val.descripcion);
         setPrecio(val.precio);
     };
@@ -146,9 +141,6 @@ function Edit() {
             console.error(error);
         }
     };
-
-
-
 
     return (
         <div className="container">
@@ -227,7 +219,7 @@ function Edit() {
                 <thead>
                     <tr>
                         <th scope="col">#</th>
-                        <th scope="col">Nombre</th>                        
+                        <th scope="col">Nombre</th>
                         <th scope="col">Descripción</th>
                         <th scope="col">Precio</th>
                         <th scope="col"></th>

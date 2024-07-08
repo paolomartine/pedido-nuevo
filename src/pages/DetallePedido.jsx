@@ -1,81 +1,17 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { DataGrid } from '@mui/x-data-grid';
-import { Typography, Stack, Box, Modal, List, ListItem, ListItemText, Checkbox } from '@mui/material';
-import Swal from 'sweetalert2';
-import { Button } from "react-bootstrap";
+import { Typography, Button, Modal, List, ListItem, ListItemText } from "@mui/material";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { useNavigate } from "react-router-dom";
 
-// Definir las columnas del DataGrid
-const columns = [
-    //{ field: 'id', headerName: 'ID', width: 70, align: 'left' },
-    {
-        field: 'pedidos',
-        headerName: 'Pedidos',
-        width: 300,
-        renderCell: (params) => (
-            <div>
-                {params.row.pedidos.map((pedido, index) => (
-                    <span key={index}>
-                        <Typography noWrap>
-                            {pedido.producto} ({pedido.cantidad}) {pedido.observacion}
-                        </Typography>
-                    </span>
-                ))}
-            </div>
-        ),
-    },
-    { field: 'destino', headerName: 'Destino', width: 210 },
-    { field: 'estado', headerName: 'Estado', width: 210 },
-    { field: 'total', headerName: 'Total', type: 'number', width: 120 },
-    {
-        field: 'acciones', headerName: 'Acciones', width: 150,
-        renderCell: (params) => (
-            <div>
-                <span>
-                    <Button
-                        onClick={() => {
-                            window.location.href = `/detallepedido`;
-                        }}
-                    >
-                        Adicionar
-                    </Button>
-                </span>
-            </div>
-        ),
-    },
-];
-
-// Estilos para el modal
-const modalStyle = {
-    position: 'absolute',
-    top: '50%',
-    left: '50%',
-    transform: 'translate(-50%, -50%)',
-    width: 400,
-    bgcolor: 'background.paper',
-    border: '2px solid #000',
-    boxShadow: 24,
-    p: 4,
-};
-
-
-
 const DetallePedido = () => {
-    const [isAnyRowSelected, setIsAnyRowSelected] = useState(false);
     const [selectedRowsData, setSelectedRowsData] = useState([]);
     const [selectedPedido, setSelectedPedido] = useState([]);
     const [checkedProductos, setCheckedProductos] = useState([]);
     const [pedidos, setPedidos] = useState([]);
-    const [domicilios, setDomicilios] = useState([]);
     const [rows, setRows] = useState([]);
     const [loadingPedidos, setLoadingPedidos] = useState(true);
-    const [loadingDomicilios, setLoadingDomicilios] = useState(true);
-    const [loadingProductos, setLoadingProductos] = useState(false);
     const [errorPedidos, setErrorPedidos] = useState(null);
-    const [errorDomicilios, setErrorDomicilios] = useState(null);
-    const [errorProductos, setErrorProductos] = useState(null);
     const [open, setOpen] = useState(false);
 
     const navigate = useNavigate();
@@ -88,18 +24,7 @@ const DetallePedido = () => {
         navigate("/despachados")
     };
 
-    const onRowsSelectionHandler = (ids) => {
-        const selectedData = ids
-            .map((id) => rows.find((row) => row.id === id))
-            .filter((row) => row !== undefined);
-
-        setIsAnyRowSelected(ids.length > 0);
-        setSelectedRowsData(selectedData);
-    };
-
-    useEffect(() => {
-        console.log(selectedRowsData);
-    }, [selectedRowsData]);
+    
 
     useEffect(() => {
         const fetchPedidos = async () => {
@@ -116,93 +41,52 @@ const DetallePedido = () => {
         fetchPedidos();
     }, []);
 
-
-    /* useEffect(() => {
-        const fetchDomicilios = async () => {
-            try {
-                const response = await axios.get("http://localhost:8085/api/v1/domicilios");
-                const filteredDomicilios = response.data.filter(domicilio => domicilio.estado === "PEDIDO");
-                setDomicilios(filteredDomicilios);
-                setLoadingDomicilios(false);
-            } catch (error) {
-                setErrorDomicilios(error);
-                setLoadingDomicilios(false);
-            }
-        };
-        fetchDomicilios();
-    }, []); */
-
-
     const fetchProductos = async (pedidoId) => {
         try {
-            const response = await axios.get(
-                `http://localhost:8085/api/v1/detallepedidos/${pedidoId}/productos`);
-            return response.data;
+            const response = await axios.get(`http://localhost:8085/api/v1/detallepedidos/${pedidoId}/productos`);
+            return response.data;            
+            
         } catch (error) {
-            setErrorProductos(error);
+            console.error("Error fetching productos:", error);
             return [];
+            
         }
+        
     };
-
-    /* const fetchProductos = async (pedidoId, domicilioId) => {
-        try {
-            const [productosPedidoResponse, productosDomicilioResponse] = await Promise.all([
-                axios.get(`http://localhost:8085/api/v1/detallepedidos/${pedidoId}/productos`),
-                axios.get(`http://localhost:8085/api/v1/detallepedidosdom/${domicilioId}/productos`)
-            ]);
     
-            return {
-                productosPedido: productosPedidoResponse.data,
-                productosDomicilio: productosDomicilioResponse.data
-            };
-        } catch (error) {
-            setErrorProductos(error);
-            return {
-                productosPedido: [],
-                productosDomicilio: []
-            };
-        }
-    }; */
-
-
-
-
     useEffect(() => {
         const generateRows = async () => {
-            setLoadingProductos(true);
-            const rows = await Promise.all(
-                pedidos.map(async (pedido) => {
-                    const productosData = await fetchProductos(pedido.id);
-                    const pedidosFormat = productosData.map((producto) => ({
-                        producto: producto.nombre,
-                        cantidad: producto.cantidad,
-                        observacion: producto.observacion,
-                    }));
-                    const total = productosData.reduce((sum, producto) => sum + (producto.precio * producto.cantidad), 0);
-                    return {
-                        id: pedido.id,
-                        pedidos: pedidosFormat,
-                        destino: `Mesa ${pedido.id_mesa.id}`,
-                        estado: pedido.estado,
-                        total: total,
+            if (pedidos.length === 0) return;
 
-                    };
-                })
-            );
-            setRows(rows);
-            setLoadingProductos(false);
+            const rowsData = [];
+            for (const pedido of pedidos) {
+                const productosData = await fetchProductos(pedido.id);
+                const total = productosData.reduce((sum, producto) => sum + (producto.precio * producto.cantidad), 0);
+                console.log(pedido.id);
+                console.log(pedidos);
+                console.log(productosData);
+                console.log(total);
+                rowsData.push({
+                    id: pedido.id,
+                    productos: productosData,
+                    destino: `Mesa ${pedido.id_mesa.id}`,
+                    estado: pedido.estado,
+                    total: total.toFixed(2),
+                });
+            }
+            setRows(rowsData);
         };
 
-        if (pedidos.length > 0) {
-            generateRows();
-        }
+        generateRows();
     }, [pedidos]);
 
-    const handleDespachar = async () => {
-        if (selectedRowsData.length > 0) {
-            const productos = await fetchProductos(selectedRowsData[0].id);
+    const handleDespachar = async (pedidoId) => {
+        try {
+            const productos = await fetchProductos(pedidoId);
             setSelectedPedido(productos);
             handleOpen();
+        } catch (error) {
+            console.error("Error fetching productos:", error);
         }
     };
 
@@ -223,97 +107,80 @@ const DetallePedido = () => {
     const handleModalDespachar = async () => {
         const pedidoId = selectedRowsData[0].id;
         try {
-            // Obtener los datos del pedido actual
-            const response = await axios.get(`http://localhost:8085/api/v1/pedidos/${pedidoId}`);
-            const pedidoData = response.data.data;
-
             // Actualizar el estado del pedido a "DESPACHADO"
-            const updatedPedido = {
-                ...pedidoData,
-                estado: 'DESPACHADO',
-            };
-            await axios.put(`http://localhost:8085/api/v1/pedidos`, updatedPedido);
+            await axios.put(`http://localhost:8085/api/v1/pedidos/${pedidoId}`, { estado: 'DESPACHADO' });
 
-            // Actualizar la disponibilidad de la mesa a true
-            const updatedMesa = {
-                ...pedidoData.id_mesa,
-                disponibilidad: false,
-            };
-            await axios.put(`http://localhost:8085/api/v1/mesas`, updatedMesa);
+            // Actualizar la disponibilidad de la mesa a false
+            const mesaId = selectedRowsData[0].id_mesa.id;
+            await axios.put(`http://localhost:8085/api/v1/mesas/${mesaId}`, { disponibilidad: false });
 
             console.log("Productos despachados:", checkedProductos);
             handleClose();
-
-
         } catch (error) {
             console.error("Error despachando productos:", error);
         }
     };
 
-    useEffect(() => {
-        const savedCheckedProductos = JSON.parse(localStorage.getItem('selectedProductos'));
-        if (savedCheckedProductos) {
-            setCheckedProductos(savedCheckedProductos);
-        }
-    }, [open]);
-
     if (loadingPedidos) return <div>Cargando pedidos...</div>;
     if (errorPedidos) return <div>Error cargando pedidos: {errorPedidos.message}</div>;
-    if (loadingProductos) return <div>Cargando productos...</div>;
-    if (errorProductos) return <div>Error cargando productos: {errorProductos.message}</div>;
 
     return (
-        <div style={{ height: 400, width: '80%', marginLeft: '10%', marginTop: '2%', marginBottom: '10%' }}>
+        <div className="container mt-5">
             <Typography variant="h6" gutterBottom>
                 Pedidos
             </Typography>
-            <DataGrid
-                rows={rows}
-                columns={columns}
-                getRowHeight={() => 'auto'}
-                initialState={{
-                    pagination: {
-                        paginationModel: { page: 0, pageSize: 5 }
-                    },
-                }}
-                pageSizeOptions={[5, 10]}
-                onRowSelectionModelChange={(ids) => onRowsSelectionHandler(ids)}
-                checkboxSelection
-            />
-            <div style={{ marginTop: '5%', textAlign: 'center', marginBottom: '5%' }}>
-                <Stack direction="row" spacing={20}>
-                    <Button variant="contained" disabled={!isAnyRowSelected} onClick={handleDespachar}>
-                        Despachar
-                    </Button>
-                </Stack>
-            </div>
-            <Modal
-                open={open}
-                onClose={handleClose}
-                aria-labelledby="modal-modal-title"
-                aria-describedby="modal-modal-description"
-            >
-                <Box sx={modalStyle}>
-                    <Typography id="modal-modal-title" variant="h6" component="h2">
+            <table className="table table-striped">
+                <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Productos</th>
+                        <th scope="col">Destino</th>
+                        <th scope="col">Estado</th>
+                        <th scope="col">Total</th>
+                        <th scope="col">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+    {rows.map((row) => (
+        <tr key={row.id}>
+            <th scope="row">{row.id}</th>
+            <td>
+                {row.productos.map((producto) => (
+                    <div key={producto.id}>
+                        <p>{producto.nombre} ({producto.cantidad})</p>
+                        <p>Observación: {producto.observacion}</p>
+                        <p>Estado: {producto.estadoDetalle}</p>
+                    </div>
+                ))}
+            </td>
+            <td>{row.destino}</td>
+            <td>{row.estado}</td>
+            <td>${row.total}</td>
+            <td>
+                <Button variant="primary" onClick={() => handleDespachar(row.id)}>
+                    Despachar
+                </Button>
+            </td>
+        </tr>
+    ))}
+</tbody>
+
+            </table>
+            <Modal open={open} onClose={handleClose}>
+                <div>
+                    <Typography variant="h6" component="h2" gutterBottom>
                         Detalles del Pedido
                     </Typography>
                     <List>
-                        {selectedPedido && selectedPedido.map((producto, index) => (
+                        {selectedPedido.map((producto, index) => (
                             <ListItem key={index} onClick={handleToggle(producto)}>
-                                <Checkbox
-                                    edge="start"
-                                    checked={checkedProductos.indexOf(producto) !== -1}
-                                    tabIndex={-1}
-                                    disableRipple
-                                />
                                 <ListItemText
-                                    primary={`Producto: ${producto.nombre} (Cantidad: ${producto.cantidad}) (Observación: ${producto.observacion})`}
+                                    primary={`Producto: ${producto.nombre} (Cantidad: ${producto.cantidad})`}
                                     secondary={`Total: $${(producto.precio * producto.cantidad).toFixed(2)}`}
                                 />
                             </ListItem>
                         ))}
                     </List>
-
                     <Button
                         variant="contained"
                         color="primary"
@@ -322,7 +189,7 @@ const DetallePedido = () => {
                     >
                         Despachar
                     </Button>
-                </Box>
+                </div>
             </Modal>
         </div>
     );

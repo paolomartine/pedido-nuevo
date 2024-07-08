@@ -14,7 +14,8 @@ const OrderForm = () => {
         pedido: null,
         producto: null,
         cantidad: 0,
-        observacion: ""
+        observacion: "",
+        estadoDetalle:'0'
     });
 
     const navigate = useNavigate();
@@ -52,12 +53,14 @@ const OrderForm = () => {
         const id_producto = formData.producto
         const cantidad = formData.cantidad
         const observacion = formData.observacion
+        const estadoDetalle = formData.estadoDetalle
         try {
             const response = await axios.post('http://localhost:8085/api/v1/detallepedidos', {
                 id_pedido,
                 id_producto,
                 cantidad,
-                observacion
+                observacion,
+                estadoDetalle,
             });
             MySwal.fire({
                 title: "¿Quiéres pedir algo más?",
@@ -106,7 +109,8 @@ const OrderForm = () => {
             pedido: formData.pedido,
             producto: null,
             cantidad: 0,
-            observacion: ""
+            observacion: "",
+            estadoDetalle:'0',
         });
     };
 
@@ -115,7 +119,8 @@ const OrderForm = () => {
             pedido: null,
             producto: null,
             cantidad: 0,
-            observacion: ""
+            observacion: "",
+            estadoDetalle: '0',
         });
     };
 
@@ -188,6 +193,22 @@ const OrderForm = () => {
                                 value={formData.observacion}
                                 onChange={handleChange}
                             /> </div>
+                            <div className="mb-3">
+                            <label htmlFor="estado" className="form-label">
+                                Estado
+                            </label>
+                            <select
+                                id="estado"
+                                name="estado"
+                                className="form-select"
+                                value={formData.estado}
+                                onChange={handleChange}
+                                required >
+                                <option value={0}>Pedido</option>
+                                <option value={1}>Despachado</option>
+                                <option value={2}>Pagado</option>
+                            </select>
+                        </div>
 
                         <button type="submit" className="btn btn-primary">Enviar</button>
                     </form>

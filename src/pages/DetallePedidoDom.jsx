@@ -9,7 +9,7 @@ import { useNavigate } from "react-router-dom";
 
 // Definir las columnas del DataGrid
 const columns = [
-    
+
 
     //{ field: 'id', headerName: 'ID', width: 70, align: 'left' },
     {
@@ -38,16 +38,16 @@ const columns = [
                 {params.row.domicilios.map((domicilio, index) => (
                     <span key={index}>
                         <Typography noWrap>
-                        
-                           ( {domicilio.id_cliente} ) 
-                           
+
+                            ( {domicilio.id} )
+
                         </Typography>
                     </span>
                 ))}
             </div>
         ),
     },
-    
+
     ,
     { field: 'estado', headerName: 'Estado', width: 100 },
     { field: 'total', headerName: 'Total', type: 'number', width: 120, align: 'right' },
@@ -66,9 +66,9 @@ const columns = [
                 </span>
             </div>
         ),
-        
+
     },
-    
+
 ];
 
 // Estilos para el modal
@@ -100,7 +100,7 @@ const DetallePedidoDom = () => {
     const [errorProductos, setErrorProductos] = useState(null);
     const [open, setOpen] = useState(false);
 
-const navigate = useNavigate();
+    const navigate = useNavigate();
 
     const handleOpen = () => setOpen(true);
     const handleClose = () => {
@@ -141,7 +141,9 @@ const navigate = useNavigate();
         try {
             const response = await axios.get(
                 `http://localhost:8085/api/v1/detallepedidosdom/${domicilioId}/productos`);
-            return response.data;
+                console.log(response.data);
+                return response.data;
+            
         } catch (error) {
             setErrorProductos(error);
             return [];
@@ -158,7 +160,7 @@ const navigate = useNavigate();
                         producto: producto.nombre,
                         cantidad: producto.cantidad,
                         observacion: producto.observacion,
-                        
+
                     }));
                     const total = productosData.reduce((sum, producto) => sum + (producto.precio * producto.cantidad), 0);
                     return {

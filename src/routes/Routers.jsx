@@ -8,6 +8,7 @@ import User from '../pages/User'
 import Edit from '../pages/Edit'
 
 import DetallePedido from '../pages/DetallePedido';
+import Detail from '../pages/Detail';
 
 import DomicilioForm from '../pages/DomicilioForm';
 import OrderForm from '../pages/OrderForm';
@@ -18,7 +19,9 @@ import OrderFormDom from '../pages/OrderFormDom';
 import DetallePedidoDom from '../pages/DetallePedidoDom';
 import DomiciliosDespachados from '../pages/DomiciliosDespachados';
 
-import Prueba1 from '../pages/Prueba1';
+
+import PedidosTable from '../pages/PedidosTable';
+import Prueba4 from '../pages/Prueba4';
 
 
 const Routers = () => {
@@ -29,7 +32,8 @@ const Routers = () => {
     <Route path="/mesas" element={<Table />} />
     <Route path="/editar" element={<Edit />} />
     <Route path="/clientes" element={<User />} />
-    <Route path="/pedidos" element={<DetallePedido />} />     
+     <Route path="/pedidos" element={<Prueba4 />} />   
+     {/* <Route path="/pedidos" element={<DetallePedido />} />       */}
     <Route path="/domicilios" element={<DomicilioForm />} /> 
     <Route path="/detallepedido" element={<OrderForm />} />
     <Route path="/detallepedidodom" element={<OrderFormDom />} />
@@ -38,7 +42,7 @@ const Routers = () => {
     <Route path="/ventas" element={<Ventas />} />
     <Route path="/domicili" element={<DetallePedidoDom />} />
     <Route path="/envios" element={<DomiciliosDespachados />} />
-    <Route path="/prueba" element={<Prueba1 />} />
+    
   </Routes>
 
 }
