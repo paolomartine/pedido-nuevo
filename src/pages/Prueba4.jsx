@@ -8,6 +8,15 @@ import withReactContent from 'sweetalert2-react-content';
 const MySwal = withReactContent(Swal);
 
 const Prueba4 = () => {
+
+    const [id, setId] = useState();
+    const [id_pedido, setId_Pedido] = useState("");
+    const [id_producto, setIdProducto] = useState("");
+    const [cantidad, setCantidad] = useState();
+    const [observacion, setObservacion] = useState("");
+    const [estadoDetalle, setEstadoDetalle] = useState("");
+    const [despachar, setDespachar] = useState(false);
+
     const [pedidos, setPedidos] = useState([]);
     const [detallesPedido, setDetallesPedido] = useState([]);
 
@@ -46,7 +55,7 @@ const Prueba4 = () => {
                         nombre: producto.nombre,
                         cantidad: producto.cantidad,
                         observacion: producto.observacion,
-                        estado_detalle: producto.estado_detalle,
+                        estadoDetalle: producto.estadoDetalle,
                     }));
                     return {
                         id: pedido.id,
@@ -77,11 +86,23 @@ const Prueba4 = () => {
     const despacharDetallePedido = async (pedido) => {
         try {
             const productosData = await fetchProductos(pedido.id);
+            console.log("Esto es pedido.id", pedido.id)
+            console.log("Esto es pedido", pedido)
+            console.log("Esto es pedido.id", pedido.nombreProductos)
+            console.log("Esto es pedido.id", pedido.destino)
             const detallesPedido = productosData.map((producto) => ({
+
                 id: producto.id,
+                id_pedido: pedido.id,
+                id_producto: producto.id,
                 nombre: producto.nombre,
+                cantidad: producto.cantidad,
+                observacion: producto.observacion,
+                estadoDetalle: producto.estadoDetalle,
+
                 seleccionado: false,
             }));
+            console.log("Hola", productosData);
             setDetallesPedido(detallesPedido);
             setIdPedido(pedido.id);
         } catch (error) {
@@ -96,22 +117,42 @@ const Prueba4 = () => {
         setDetallesPedido(updatedDetallesPedido);
     };
 
-    const actualizarEstadoDetalle = async () => {
+    const actualizarEstadoDetalle = async (pedido) => {
         try {
+            const detallesSeleccionados = detallesPedido.filter((detalle) => detalle.seleccionado);
+            console.log("seleccionados", detallesSeleccionados)
+            
             await axios.put(`http://localhost:8085/api/v1/detallepedidos`, {
-                pedidoId: idPedido,
-                detallesPedido: detallesPedido.filter((detalle) => detalle.seleccionado),
+                //id:detalle,
+                id_pedido,
+                id_producto,
+                cantidad,
+                observacion,
+                estadoDetalle,
             });
+
             MySwal.fire({
                 title: "<strong>Actualización exitosa!!!</strong>",
                 html: "<i>El estado del detalle fue actualizado con éxito!</i>",
                 icon: "success"
             });
+
             fetchPedidos();
         } catch (error) {
             console.error("Error updating estado detalle:", error);
         }
     };
+
+    const DespacharDetallePedido = (val) => {
+        setDespachar(true);
+        setId(val.id);
+        setId_Pedido(val.id_pedido);
+        setIdProducto(val.id_producto);
+        setCantidad(val.cantidad);
+        setObservacion(val.observacion);
+        setEstadoDetalle(val.estadoDetalle);
+    };
+
 
     return (
         <div>
@@ -137,7 +178,7 @@ const Prueba4 = () => {
                                                         <td>{producto.nombre}</td>
                                                         <td>({producto.cantidad})</td>
                                                         <td>{producto.observacion}</td>
-                                                        <td>{producto.estado_detalle}</td>
+                                                        <td>{producto.estadoDetalle}</td>
                                                     </tr>
                                                 </tbody>
                                             </table>
@@ -148,7 +189,7 @@ const Prueba4 = () => {
                                 <td>{pedido.total}</td>
                                 <td>
                                     <ButtonGroup>
-                                        <Button variant="secondary" onClick={() => despacharDetallePedido(pedido)}>Despachar</Button>
+                                        <Button variant="secondary" onClick={() => DespacharDetallePedido(pedido)}>Despachar</Button>
                                     </ButtonGroup>
                                 </td>
                             </tr>
@@ -164,7 +205,7 @@ const Prueba4 = () => {
                                 <Form.Check
                                     key={detalle.id}
                                     type="checkbox"
-                                    label={`${detalle.nombre}`}
+                                    label={`${detalle.nombre}${(detalle.cantidad)} ${detalle.observacion} ${detalle.estadoDetalle}`}
                                     checked={detalle.seleccionado}
                                     onChange={() => handleCheckboxChange(detalle.id)}
                                 />
