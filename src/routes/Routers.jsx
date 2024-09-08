@@ -21,7 +21,8 @@ import DomiciliosDespachados from '../pages/DomiciliosDespachados';
 
 
 import PedidosTable from '../pages/PedidosTable';
-import Prueba4 from '../pages/Prueba4';
+
+import Prueba6 from '../pages/Prueba6';
 
 
 const Routers = () => {
@@ -32,7 +33,7 @@ const Routers = () => {
     <Route path="/mesas" element={<Table />} />
     <Route path="/editar" element={<Edit />} />
     <Route path="/clientes" element={<User />} />
-     <Route path="/pedidos" element={<Prueba4 />} />   
+     <Route path="/pedidos" element={<Prueba6 />} />   
      {/* <Route path="/pedidos" element={<DetallePedido />} />       */}
     <Route path="/domicilios" element={<DomicilioForm />} /> 
     <Route path="/detallepedido" element={<OrderForm />} />

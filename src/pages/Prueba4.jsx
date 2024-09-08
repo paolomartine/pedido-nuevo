@@ -8,17 +8,17 @@ import withReactContent from 'sweetalert2-react-content';
 const MySwal = withReactContent(Swal);
 
 const Prueba4 = () => {
-
-    const [id, setId] = useState();
+    const [id, setId] = useState(null);
     const [id_pedido, setId_Pedido] = useState("");
     const [id_producto, setIdProducto] = useState("");
-    const [cantidad, setCantidad] = useState();
+    const [cantidad, setCantidad] = useState(null);
     const [observacion, setObservacion] = useState("");
     const [estadoDetalle, setEstadoDetalle] = useState("");
     const [despachar, setDespachar] = useState(false);
 
     const [pedidos, setPedidos] = useState([]);
     const [detallesPedido, setDetallesPedido] = useState([]);
+    const [idPedido, setIdPedido] = useState("");
 
     useEffect(() => {
         fetchPedidos();
@@ -37,12 +37,15 @@ const Prueba4 = () => {
     const fetchProductos = async (pedidoId) => {
         try {
             const response = await axios.get(`http://localhost:8085/api/v1/detallepedidos/${pedidoId}/productos`);
-            return response.data;
+            const productos = response.data.filter(producto => producto.estadoDetalle === 0);
+            return productos;
         } catch (error) {
             console.error("Error fetching productos:", error);
             return [];
         }
     };
+    
+    
 
     const fetchPedidosWithData = async (pedidosData) => {
         const pedidosWithData = await Promise.all(
@@ -81,17 +84,10 @@ const Prueba4 = () => {
         return productosData.reduce((sum, producto) => sum + (producto.precio * producto.cantidad), 0);
     };
 
-    const [idPedido, setIdPedido] = useState("");
-
     const despacharDetallePedido = async (pedido) => {
         try {
             const productosData = await fetchProductos(pedido.id);
-            console.log("Esto es pedido.id", pedido.id)
-            console.log("Esto es pedido", pedido)
-            console.log("Esto es pedido.id", pedido.nombreProductos)
-            console.log("Esto es pedido.id", pedido.destino)
             const detallesPedido = productosData.map((producto) => ({
-
                 id: producto.id,
                 id_pedido: pedido.id,
                 id_producto: producto.id,
@@ -99,10 +95,8 @@ const Prueba4 = () => {
                 cantidad: producto.cantidad,
                 observacion: producto.observacion,
                 estadoDetalle: producto.estadoDetalle,
-
                 seleccionado: false,
             }));
-            console.log("Hola", productosData);
             setDetallesPedido(detallesPedido);
             setIdPedido(pedido.id);
         } catch (error) {
@@ -117,20 +111,25 @@ const Prueba4 = () => {
         setDetallesPedido(updatedDetallesPedido);
     };
 
-    const actualizarEstadoDetalle = async (pedido) => {
+     const actualizarEstadoDetalle = async () => {
         try {
             const detallesSeleccionados = detallesPedido.filter((detalle) => detalle.seleccionado);
-            console.log("seleccionados", detallesSeleccionados)
-            
-            await axios.put(`http://localhost:8085/api/v1/detallepedidos`, {
-                //id:detalle,
-                id_pedido,
-                id_producto,
-                cantidad,
-                observacion,
-                estadoDetalle,
-            });
-
+            console.log("Detalles seleccionados para actualización:", detallesSeleccionados);
+    
+            await Promise.all(
+                detallesSeleccionados.map((detalle) => {
+                    const data = {
+                        id: detalle.id,
+                        id_pedido: { id: detalle.id_pedido },
+                        id_producto: { id: detalle.id_producto },
+                        cantidad: detalle.cantidad,
+                        observacion: detalle.observacion,
+                        estadoDetalle: 1,
+                    };
+                    console.log("Datos a enviar:", data);
+                    return axios.put(`http://localhost:8085/api/v1/detallepedidos`, data);
+                })
+            );
             MySwal.fire({
                 title: "<strong>Actualización exitosa!!!</strong>",
                 html: "<i>El estado del detalle fue actualizado con éxito!</i>",
@@ -138,10 +137,68 @@ const Prueba4 = () => {
             });
 
             fetchPedidos();
+            
         } catch (error) {
             console.error("Error updating estado detalle:", error);
         }
+    }; 
+
+    /* const actualizarEstadoDetalle = async () => {
+        try {
+            const detallesSeleccionados = detallesPedido.filter((detalle) => detalle.seleccionado);
+            console.log("Detalles seleccionados para actualización:", detallesSeleccionados);
+    
+            await Promise.all(
+                detallesSeleccionados.map((detalle) => {
+                    let nuevoEstado;
+                    if (detalle.estadoDetalle === 0) {
+                        nuevoEstado = 1;
+                    } else if (detalle.estadoDetalle === 1) {
+                        nuevoEstado = 2;
+                    } else {
+                        // Handle other cases if needed
+                        nuevoEstado = detalle.estadoDetalle; // Keep the current state
+                    }
+    
+                    const data = {
+                        id: detalle.id,
+                        id_pedido: { id: detalle.id_pedido },
+                        id_producto: { id: detalle.id_producto },
+                        cantidad: detalle.cantidad,
+                        observacion: detalle.observacion,
+                        estadoDetalle: nuevoEstado,
+                    };
+                    console.log("Datos a enviar:", data);
+                    return axios.put(`http://localhost:8085/api/v1/detallepedidos`, data);
+                })
+            );
+    
+            MySwal.fire({
+                title: "<strong>Actualización exitosa!!!</strong>",
+                html: "<i>El estado del detalle fue actualizado con éxito!</i>",
+                icon: "success"
+            });
+    
+            fetchPedidos();
+    
+        } catch (error) {
+            console.error("Error updating estado detalle:", error);
+        }
+    }; */
+    
+    
+    
+    
+    const cancelarDespacho = () => {
+        setDetallesPedido([]);
+        setIdPedido("");
+        setId_Pedido("");
+        setIdProducto("");
+        setCantidad(null);
+        setObservacion("");
+        setEstadoDetalle("");
     };
+    
 
     const DespacharDetallePedido = (val) => {
         setDespachar(true);
@@ -152,7 +209,6 @@ const Prueba4 = () => {
         setObservacion(val.observacion);
         setEstadoDetalle(val.estadoDetalle);
     };
-
 
     return (
         <div>
@@ -189,7 +245,7 @@ const Prueba4 = () => {
                                 <td>{pedido.total}</td>
                                 <td>
                                     <ButtonGroup>
-                                        <Button variant="secondary" onClick={() => DespacharDetallePedido(pedido)}>Despachar</Button>
+                                        <Button variant="secondary" onClick={() => despacharDetallePedido(pedido)}>Despachar</Button>
                                     </ButtonGroup>
                                 </td>
                             </tr>
@@ -205,12 +261,14 @@ const Prueba4 = () => {
                                 <Form.Check
                                     key={detalle.id}
                                     type="checkbox"
-                                    label={`${detalle.nombre}${(detalle.cantidad)} ${detalle.observacion} ${detalle.estadoDetalle}`}
+                                    label={`${detalle.nombre} (${detalle.cantidad}) ${detalle.observacion} ${detalle.estadoDetalle}`}
                                     checked={detalle.seleccionado}
                                     onChange={() => handleCheckboxChange(detalle.id)}
                                 />
                             ))}
+                            
                             <Button variant="primary" onClick={actualizarEstadoDetalle}>Despachar productos</Button>
+                            <Button variant="secondary" onClick={cancelarDespacho}>Cancelar</Button>
                         </Form>
                     </div>
                 )}
