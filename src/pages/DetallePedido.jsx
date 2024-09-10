@@ -3,6 +3,8 @@ import axios from "axios";
 import { DataGrid } from '@mui/x-data-grid';
 import { Typography, Button, Stack, Box, Modal, List, ListItem, ListItemText, Checkbox } from '@mui/material';
 import Swal from 'sweetalert2';
+import withReactContent from 'sweetalert2-react-content';
+import { useNavigate } from "react-router-dom";
 
 // Definir las columnas del DataGrid
 const columns = [
@@ -41,6 +43,8 @@ const modalStyle = {
     p: 4,
 };
 
+const MySwal = withReactContent(Swal);
+
 const DetallePedido = () => {
     const [isAnyRowSelected, setIsAnyRowSelected] = useState(false);
     const [selectedRowsData, setSelectedRowsData] = useState([]);
@@ -59,6 +63,18 @@ const DetallePedido = () => {
         localStorage.setItem('checkedProductos',JSON.stringify([]))
         setCheckedProductos([])
     }
+
+    const navigate = useNavigate();
+
+    const screenClean=()=>{
+        navigate("/despachados")
+        MySwal.fire({
+            title: "El pedido se ha despachado:",
+            text: "Buen provecho!",
+            icon: "burguer"
+        });
+    }
+
     const handleClose = () => {
         setOpen(false);
         setCheckedProductos([]);
@@ -90,7 +106,7 @@ const DetallePedido = () => {
                 const response = await axios.get("http://localhost:8085/api/v1/pedidos");
                 const filteredPedidos = response.data.filter(pedido => pedido.estado === "PEDIDO");
                 setPedidos(filteredPedidos);
-                //setPedidos(response.data);
+                
                 setLoadingPedidos(false);
             } catch (error) {
                 setErrorPedidos(error);
@@ -157,7 +173,7 @@ const DetallePedido = () => {
     const handleToggle = (producto) => () => {
         const currentIndex = checkedProductos.indexOf(producto);
         const newChecked = [...checkedProductos];
-        //let newChecked = JSON.parse(localStorage.getItem('checkedProductos'))
+        
 
         if (currentIndex === -1) {
             console.log('is empty and pushing')
@@ -199,7 +215,7 @@ const DetallePedido = () => {
 
             console.log("Productos despachados:", checkedProductos);
             handleClose();
-
+            screenClean();
 
         } catch (error) {
             console.error("Error despachando productos:", error);
@@ -258,7 +274,7 @@ const DetallePedido = () => {
                             <ListItem key={index} button onClick={handleToggle(producto)}>
                                 <Checkbox
                                     edge="start"
-                                    //checked={JSON.parse(localStorage.getItem("checkedProductos")).indexOf(producto) !== -1}
+                                    
                                     checked={checkedProductos.indexOf(producto) !== -1}
                                     tabIndex={-1}
                                     disableRipple
