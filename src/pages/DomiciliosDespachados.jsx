@@ -1,273 +1,154 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { DataGrid } from '@mui/x-data-grid';
-import { Typography, Stack, Box, Modal, List, ListItem, ListItemText, Checkbox } from '@mui/material';
+import { Typography, Button, Stack, Box, Modal, List, ListItem, ListItemText, Checkbox } from '@mui/material';
 import Swal from 'sweetalert2';
-import { Button } from "react-bootstrap";
-import "bootstrap/dist/css/bootstrap.min.css";
+import withReactContent from 'sweetalert2-react-content';
 import { useNavigate } from "react-router-dom";
 
-// Definir las columnas del DataGrid
+const MySwal = withReactContent(Swal);
+
 const columns = [
-
-    //{ field: 'id', headerName: 'ID', width: 70, align: 'left' },
-    {
-        field: 'domicilios',
-        headerName: 'Domicilios',
-        width: 300,
-        renderCell: (params) => (
-            <div>
-                {params.row.domicilios.map((domicilio, index) => (
-                    <span key={index}>
-                        <Typography noWrap>
-                            {domicilio.producto} ({domicilio.cantidad}) {domicilio.observacion}
-                        </Typography>
-                    </span>
-                ))}
-            </div>
-        ),
-    },
-    { field: 'destino', headerName: 'Destino', width: 210 },
-    { field: 'estado', headerName: 'Estado', width: 210 },
-    { field: 'total', headerName: 'Total', type: 'number', width: 120 },
-    {
-        field: 'acciones', headerName: 'Acciones', width: 150,
-        renderCell: (params) => (
-            <div>
-                <span>
-
-                </span>
-            </div>
-        ),
-    },
+  { field: 'id', headerName: 'ID', width: 70 },
+  {
+    field: 'domiclios',
+    headerName: 'Domicilios',
+    width: 300,
+    renderCell: ({ row }) => (
+      <div>{row.domicilios.map((domicilio, index) => (
+        <Typography key={index} noWrap>{`${domicilio.producto} (Cantidad: ${domicilio.cantidad})`}</Typography>
+      ))}</div>
+    ),
+  },
+  { field: 'destino', headerName: 'Destino', width: 210 },
+  { field: 'estado', headerName: 'Estado', width: 210 },
+  { field: 'total', headerName: 'Total', type: 'number', width: 120 },
 ];
 
-// Estilos para el modal
-const modalStyle = {
-    position: 'absolute',
-    top: '50%',
-    left: '50%',
-    transform: 'translate(-50%, -50%)',
-    width: 400,
-    bgcolor: 'background.paper',
-    border: '2px solid #000',
-    boxShadow: 24,
-    p: 4,
-};
-
 const DomiciliosDespachados = () => {
-    const [isAnyRowSelected, setIsAnyRowSelected] = useState(false);
-    const [selectedRowsData, setSelectedRowsData] = useState([]);
-    const [selectedDomicilio, setSelectedDomicilio] = useState([]);
-    const [checkedProductos, setCheckedProductos] = useState([]);
-    const [domicilios, setDomicilios] = useState([]);
+  const [isAnyRowSelected, setIsAnyRowSelected] = useState(false);
+  const [selectedRowsData, setSelectedRowsData] = useState([]);
+  const [selectedDomicilio, setSelectedDomicilio] = useState([]);
+  const [checkedProductos, setCheckedProductos] = useState([]);
+  const [domicilios, setDomicilios] = useState([]);
+  const [rows, setRows] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
 
-    const [rows, setRows] = useState([]);
-    const [loadingDomicilios, setLoadingDomicilios] = useState(true);
-
-    const [loadingProductos, setLoadingProductos] = useState(false);
-
-    const [errorDomicilios, setErrorDomicilios] = useState(null);
-    const [errorProductos, setErrorProductos] = useState(null);
-    const [open, setOpen] = useState(false);
-
-    const navigate = useNavigate;
-    const handleOpen = () => setOpen(true);
-    const handleClose = () => {
-        setOpen(false);
-        setCheckedProductos([]);
-        localStorage.removeItem('selectedProductos');
+  useEffect(() => {
+    const fetchDomicilios = async () => {
+      try {
+        const { data } = await axios.get("http://localhost:8085/api/v1/domicilios");
+        const filteredDomicilios = data.filter(domicilio => domicilio.estado === "DESPACHADO");
+        setDomicilios(filteredDomicilios);
+        setLoading(false);
+      } catch (error) {
+        setError(error);
+        setLoading(false);
+      }
     };
+    fetchDomicilios();
+  }, []);
 
-    const onRowsSelectionHandler = (ids) => {
-        const selectedData = ids
-            .map((id) => rows.find((row) => row.id === id))
-            .filter((row) => row !== undefined);
-
-        setIsAnyRowSelected(ids.length > 0);
-        setSelectedRowsData(selectedData);
+  useEffect(() => {
+    const generateRows = async () => {
+      const rowsData = await Promise.all(domicilios.map(async (domicilio) => {
+        const productosData = await fetchProductos(domicilio.id);
+        const domicilios = productosData.map(({ nombre, cantidad }) => ({ producto: nombre, cantidad }));
+        const total = productosData.reduce((sum, { precio, cantidad }) => sum + (precio * cantidad), 0);
+        return { 
+            id: domicilio.id, 
+            domicilios, 
+            destino:  domicilio.id_cliente.direccion, 
+            estado: domicilio.estado, 
+            total };
+      }));
+      setRows(rowsData);
     };
+    if (domicilios.length) generateRows();
+  }, [domicilios]);
 
-    useEffect(() => {
-        console.log(selectedRowsData);
-    }, [selectedRowsData]);
+  const fetchProductos = async (domicilioId) => {
+    try {
+      const { data } = await axios.get(`http://localhost:8085/api/v1/detallepedidosdom/${domicilioId}/productos`);
+      return data;
+    } catch (error) {
+      setError(error);
+      return [];
+    }
+  };
 
-    useEffect(() => {
-        const fetchDomicilios = async () => {
-            try {
-                const response = await axios.get("http://localhost:8085/api/v1/domicilios");
-                const filteredDomicilios = response.data.filter(domicilio => domicilio.estado === "DESPACHADO");
-                setDomicilios(filteredDomicilios);
-                setLoadingDomicilios(false);
-            } catch (error) {
-                setErrorDomicilios(error);
-                setLoadingDomicilios(false);
-            }
-        };
-        fetchDomicilios();
-    }, []);
+  const handleOpen = () => {
+    setOpen(true);
+    setCheckedProductos([]);
+  };
 
-    const fetchProductos = async (domicilioId) => {
-        try {
-            const response = await axios.get(
-                `http://localhost:8085/api/v1/detallepedidosdom/${domicilioId}/productos`);
-            return response.data;
-        } catch (error) {
-            setErrorProductos(error);
-            return [];
-        }
-    };
+  const handleClose = () => {
+    setOpen(false);
+    setCheckedProductos([]);
+    localStorage.removeItem('selectedProductos');
+  };
 
-    useEffect(() => {
-        const generateRows = async () => {
-            setLoadingProductos(true);
-            const rows = await Promise.all(
-                domicilios.map(async (domicilio) => {
-                    const productosData = await fetchProductos(domicilio.id);
-                    const domiciliosFormat = productosData.map((producto) => ({
-                        producto: producto.nombre,
-                        cantidad: producto.cantidad,
-                        observacion: producto.observacion,
-                    }));
-                    const total = productosData.reduce((sum, producto) => sum + (producto.precio * producto.cantidad), 0);
-                    return {
-                        id: domicilio.id,
-                        domicilios: domiciliosFormat,
-                        destino: domicilio.id_cliente.direccion,
-                        estado: domicilio.estado,
-                        total: total,
-                    };
-                })
-            );
-            setRows(rows);
-            setLoadingProductos(false);
-        };
+  const onRowsSelectionHandler = (ids) => {
+    const selectedData = ids.map(id => rows.find(row => row.id === id)).filter(Boolean);
+    setIsAnyRowSelected(ids.length > 0);
+    setSelectedRowsData(selectedData);
+  };
 
-        if (domicilios.length > 0) {
-            generateRows();
-        }
-    }, [domicilios]);
+  const handlePagar = async () => {
+    if (selectedRowsData.length) {
+      const productos = await fetchProductos(selectedRowsData[0].id);
+      setSelectedDomicilio(productos);
+      handleOpen();
+    }
+  };
 
-    const handleDespachar = async () => {
-        if (selectedRowsData.length > 0) {
-            const productos = await fetchProductos(selectedRowsData[0].id);
-            setSelectedDomicilio(productos);
-            handleOpen();
-        }
-    };
+  const handleModalPagar = async () => {
+    const domicilioId = selectedRowsData[0].id;
+    try {
+      const { data } = await axios.get(`http://localhost:8085/api/v1/domicilios/${domicilioId}`);
+      await axios.put(`http://localhost:8085/api/v1/domicilios`, { ...data.data, estado: 'PAGADO' });
+      handleClose();
+      navigate("/ventas");
+      MySwal.fire({ title: "El domicilio se ha pagado:", text: "Gracias por tu compra!", icon: "success" });
+    } catch (error) {
+      console.error("Error pagando productos:", error);
+    }
+  };
 
-    const handleToggle = (producto) => () => {
-        const currentIndex = checkedProductos.indexOf(producto);
-        const newChecked = [...checkedProductos];
+  if (loading) return <div>Cargando domicilios...</div>;
+  if (error) return <div>Error cargando domicilios: {error.message}</div>;
 
-        if (currentIndex === -1) {
-            newChecked.push(producto);
-        } else {
-            newChecked.splice(currentIndex, 1);
-        }
-
-        setCheckedProductos(newChecked);
-        localStorage.setItem('selectedProductos', JSON.stringify(newChecked));
-    };
-
-    const handleModalDespachar = async () => {
-        const domicilioId = selectedRowsData[0].id;
-        try {
-            // Obtener los datos del domicilio actual
-            const response = await axios.get(`http://localhost:8085/api/v1/domicilios/${domicilioId}`);
-            const domicilioData = response.data.data;
-
-            // Actualizar el estado del domicilio a "PAGADO"
-            const updatedDomicilio = {
-                ...domicilioData,
-                estado: 'PAGADO',
-            };
-            await axios.put(`http://localhost:8085/api/v1/domicilios`, updatedDomicilio);
-
-            handleClose();
-
-        } catch (error) {
-            console.error("Error despachando productos:", error);
-        }
-        navigate("/prueba")
-    };
-
-    useEffect(() => {
-        const savedCheckedProductos = JSON.parse(localStorage.getItem('selectedProductos'));
-        if (savedCheckedProductos) {
-            setCheckedProductos(savedCheckedProductos);
-        }
-    }, [open]);
-
-    if (loadingDomicilios) return <div>Cargando domicilios...</div>;
-    if (errorDomicilios) return <div>Error cargando domicilios: {errorDomicilios.message}</div>;
-    if (loadingProductos) return <div>Cargando productos...</div>;
-    if (errorProductos) return <div>Error cargando productos: {errorProductos.message}</div>;
-
-    return (
-        <div style={{ height: 400, width: '80%', marginLeft: '10%', marginTop: '2%', marginBottom: '10%' }}>
-            <Typography variant="h6" gutterBottom>
-                Domicilios en entrega
-            </Typography>
-            <DataGrid
-                rows={rows}
-                columns={columns}
-                getRowHeight={() => 'auto'}
-                initialState={{
-                    pagination: {
-                        paginationModel: { page: 0, pageSize: 5 }
-                    },
-                }}
-                pageSizeOptions={[5, 10]}
-                onRowSelectionModelChange={(ids) => onRowsSelectionHandler(ids)}
-                checkboxSelection
-            />
-            <div style={{ marginTop: '5%', textAlign: 'center', marginBottom: '5%' }}>
-                <Stack direction="row" spacing={20}>
-                    <Button variant="contained" disabled={!isAnyRowSelected} onClick={handleDespachar}>
-                        Pagar
-                    </Button>
-                </Stack>
-            </div>
-            <Modal
-                open={open}
-                onClose={handleClose}
-                aria-labelledby="modal-modal-title"
-                aria-describedby="modal-modal-description"
-            >
-                <Box sx={modalStyle}>
-                    <Typography id="modal-modal-title" variant="h6" component="h2">
-                        Detalles del Domicilio
-                    </Typography>
-                    <List>
-                        {selectedDomicilio && selectedDomicilio.map((producto, index) => (
-                            <ListItem key={index} onClick={handleToggle(producto)}>
-                                <Checkbox
-                                    edge="start"
-                                    checked={checkedProductos.indexOf(producto) !== -1}
-                                    tabIndex={-1}
-                                    disableRipple
-                                />
-                                <ListItemText
-                                    primary={`Producto: ${producto.nombre} (Cantidad: ${producto.cantidad}) (Observación: ${producto.observacion})`}
-                                    secondary={`Total: $${(producto.precio * producto.cantidad).toFixed(2)}`}
-                                />
-                            </ListItem>
-                        ))}
-                    </List>
-
-                    <Button
-                        variant="contained"
-                        color="primary"
-                        onClick={handleModalDespachar}
-                        disabled={checkedProductos.length !== selectedDomicilio.length}
-                    >
-                        Pagar
-                    </Button>
-                </Box>
-            </Modal>
-        </div>
-    );
+  return (
+    <div style={{ height: 400, width: '80%', margin: '5% auto' }}>
+      <Typography variant="h6" gutterBottom>Domicilios</Typography>
+      <DataGrid rows={rows} columns={columns} checkboxSelection onRowSelectionModelChange={onRowsSelectionHandler} />
+      <Stack direction="row" spacing={2} style={{ marginTop: '5%', justifyContent: 'center' }}>
+        <Button variant="contained" disabled={!isAnyRowSelected} onClick={handlePagar}>Pagar</Button>
+      </Stack>
+      <Modal open={open} onClose={handleClose}>
+        <Box sx={{ p: 4, bgcolor: 'background.paper' }}>
+          <Typography variant="h6">Detalles del Domicilio</Typography>
+          <List>
+            {selectedDomicilio.map((producto, index) => (
+              <ListItem key={index} button onClick={() => setCheckedProductos((prev) => {
+                const newChecked = [...prev];
+                const idx = newChecked.indexOf(producto);
+                idx === -1 ? newChecked.push(producto) : newChecked.splice(idx, 1);
+                return newChecked;
+              })}>
+                <Checkbox checked={checkedProductos.includes(producto)} />
+                <ListItemText primary={`${producto.nombre} (Cantidad: ${producto.cantidad})`} secondary={`Total: $${producto.precio * producto.cantidad}`} />
+              </ListItem>
+            ))}
+          </List>
+          <Button variant="contained" color="primary" onClick={handleModalPagar} disabled={checkedProductos.length !== selectedDomicilio.length}>Pagar</Button>
+        </Box>
+      </Modal>
+    </div>
+  );
 };
 
 export default DomiciliosDespachados;

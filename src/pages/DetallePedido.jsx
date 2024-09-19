@@ -186,7 +186,6 @@ const DetallePedido = () => {
             newChecked.splice(currentIndex, 1);
             console.log(newChecked)
         }
-
         setCheckedProductos(newChecked);
         localStorage.setItem('checkedProductos', JSON.stringify(newChecked))
         localStorage.setItem('selectedProductos', JSON.stringify(newChecked));
