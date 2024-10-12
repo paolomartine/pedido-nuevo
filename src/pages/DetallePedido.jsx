@@ -1,33 +1,52 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { DataGrid } from '@mui/x-data-grid';
-import { Typography, Button, Stack, Box, Modal, List, ListItem, ListItemText, Checkbox } from '@mui/material';
+import { Button } from "react-bootstrap";
+import { Typography, Stack, Box, Modal, List, ListItem, ListItemText, Checkbox } from '@mui/material';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
 import { useNavigate } from "react-router-dom";
 
 // Definir las columnas del DataGrid
 const columns = [
-    { field: 'id', headerName: 'ID', width: 70, align: 'left' },
+    { field: 'id', headerName: 'ID_Pedido', width: 70, align: 'left' },
     {
         field: 'pedidos',
-        headerName: 'Pedidos',
-        width: 300,
+        headerName: 'Productos Pedidos',
+        width: 400,
         renderCell: (params) => (
             <div>
                 {params.row.pedidos.map((pedido, index) => (
                     <span key={index}>
                         <Typography noWrap>
-                            {pedido.producto} (Cantidad: {pedido.cantidad})
+                            {pedido.producto} 
+                            (Cantidad: {pedido.cantidad})
+                            { pedido.observacion }
                         </Typography>
                     </span>
                 ))}
             </div>
         ),
     },
-    { field: 'destino', headerName: 'Destino', width: 210 },
-    { field: 'estado', headerName: 'Estado', width: 210 },
+    { field: 'destino', headerName: 'Destino', width: 120 },
+    { field: 'estado', headerName: 'Estado', width: 120 },
     { field: 'total', headerName: 'Total', type: 'number', width: 120 },
+    { field: 'acciones', headerName: 'Acciones', type: 'number', width: 120 ,
+        renderCell: (params) => (
+            <div>
+            <span>
+                <Button
+                    onClick={() => {
+                        window.location.href = `/detallepedido`;
+                    }}
+                >
+                    Agregar
+                </Button>
+            </span>
+        </div>
+        ),
+
+    },
 ];
 
 // Estilos para el modal
@@ -135,6 +154,7 @@ const DetallePedido = () => {
                     const pedidosFormat = productosData.map((producto) => ({
                         producto: producto.nombre,
                         cantidad: producto.cantidad,
+                        observacion: producto.observacion,
                     }));
                     const total = productosData.reduce((sum, producto) => sum + (producto.precio * producto.cantidad), 0);
                     return {
@@ -212,6 +232,13 @@ const DetallePedido = () => {
             };
             await axios.put(`http://localhost:8085/api/v1/mesas`, updatedMesa);
 
+            // Actualizar el estado de detallePedido a "DESPACHADO"
+            const updatedEstadoDetalle = {
+                ...pedidoData.detallePedido.estado,
+                estado: "DESPACHADO",
+            };
+            await axios.put(`http://localhost:8085/api/v1/detallepedidos`, updatedEstadoDetalle);
+
             console.log("Productos despachados:", checkedProductos);
             handleClose();
             screenClean();
@@ -234,7 +261,7 @@ const DetallePedido = () => {
     if (errorProductos) return <div>Error cargando productos: {errorProductos.message}</div>;
 
     return (
-        <div style={{ height: 400, width: '80%', marginLeft: '10%', marginTop: '5%', marginBottom: '5%' }}>
+        <div style={{ height: 300, width: '80%', marginLeft: '10%', marginTop: '3%', marginBottom: '3%' }}>
             <Typography variant="h6" gutterBottom>
                 Pedidos
             </Typography>

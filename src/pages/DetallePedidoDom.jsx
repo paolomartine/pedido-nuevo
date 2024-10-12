@@ -9,8 +9,6 @@ import { useNavigate } from "react-router-dom";
 
 // Definir las columnas del DataGrid
 const columns = [
-
-
     //{ field: 'id', headerName: 'ID', width: 70, align: 'left' },
     {
         field: 'domicilios',
@@ -38,8 +36,8 @@ const columns = [
                 {params.row.domicilios.map((domicilio, index) => (
                     <span key={index}>
                         <Typography noWrap>
-
-                            ( {domicilio.id} )
+                        
+                            ({domicilio.id_cliente } )
 
                         </Typography>
                     </span>

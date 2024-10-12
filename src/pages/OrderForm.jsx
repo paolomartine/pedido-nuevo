@@ -171,17 +171,19 @@ const OrderForm = () => {
                             </select>
                         </div>
                         <div className="mb-3">
-                            <label htmlFor="cantidad" className="form-label">Cantidad</label>
-                            <input
-                                type="number"
-                                className="form-control"
-                                id="cantidad"
-                                name="cantidad"
-                                value={formData.cantidad}
-                                onChange={handleChange}
-                                required
-                            />
-                        </div>
+    <label htmlFor="cantidad" className="form-label">Cantidad</label>
+    <input
+        type="number"
+        className="form-control"
+        id="cantidad"
+        name="cantidad"
+        value={formData.cantidad}
+        onChange={handleChange}
+        min="1" // Ensures the value is greater than 0
+        required
+    />
+</div>
+
 
                         <div className="mb-3">
                             <label htmlFor="cantidad" className="form-label">Observación<noscript></noscript></label>

@@ -8,10 +8,10 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import { useNavigate } from "react-router-dom";
 // Definir las columnas del DataGrid
 const columns = [
-    //{ field: 'id', headerName: 'ID', width: 70, align: 'left' },
+    { field: 'id', headerName: 'ID_Pedido', width: 70, align: 'left' },
     {
         field: 'pedidos',
-        headerName: 'Despachados',
+        headerName: 'Productos Despachados',
         width: 300,
         renderCell: (params) => (
             <div>
@@ -25,8 +25,8 @@ const columns = [
             </div>
         ),
     },
-    { field: 'destino', headerName: 'Destino', width: 210 },
-    { field: 'estado', headerName: 'Estado', width: 210 },
+    { field: 'destino', headerName: 'Destino', width: 120 },
+    { field: 'estado', headerName: 'Estado', width: 120 },
     { field: 'total', headerName: 'Total', type: 'number', width: 120 },
     { field: 'acciones', headerName: 'Acciones', width: 150,
         renderCell: (params) => (
@@ -217,7 +217,7 @@ const Despachados = () => {
     if (errorProductos) return <div>Error cargando productos: {errorProductos.message}</div>;
 
     return (
-        <div style={{ height: 400, width: '80%', marginLeft: '10%', marginTop: '2%', marginBottom: '10%' }}>
+        <div style={{ height: 260, width: '80%', marginLeft: '10%', marginTop: '2%', marginBottom: '10%' }}>
             <Typography variant="h6" gutterBottom>
                 Despachados en mesas
             </Typography>

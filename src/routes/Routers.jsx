@@ -19,12 +19,6 @@ import OrderFormDom from '../pages/OrderFormDom';
 import DetallePedidoDom from '../pages/DetallePedidoDom';
 import DomiciliosDespachados from '../pages/DomiciliosDespachados';
 
-
-import PedidosTable from '../pages/PedidosTable';
-
-import Prueba6 from '../pages/Prueba6';
-
-
 const Routers = () => {
   return <Routes>
     <Route path="/" element={<Menu />} />   
@@ -32,9 +26,8 @@ const Routers = () => {
     <Route path="/menu" element={<Menu />} />      
     <Route path="/mesas" element={<Table />} />
     <Route path="/editar" element={<Edit />} />
-    <Route path="/clientes" element={<User />} />
-        
-     <Route path="/pedidos" element={<DetallePedido />} />       
+    <Route path="/clientes" element={<User />} />        
+     <Route path="/pedidos" element={<DetallePedido />} />        
     <Route path="/domicilios" element={<DomicilioForm />} /> 
     <Route path="/detallepedido" element={<OrderForm />} />
     <Route path="/detallepedidodom" element={<OrderFormDom />} />
@@ -43,6 +36,7 @@ const Routers = () => {
     <Route path="/ventas" element={<Ventas />} />
     <Route path="/domicili" element={<DetallePedidoDom />} />
     <Route path="/envios" element={<DomiciliosDespachados />} />
+    
     
   </Routes>
 
