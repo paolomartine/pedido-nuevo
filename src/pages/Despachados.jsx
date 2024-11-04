@@ -7,6 +7,7 @@ import { Button } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { useNavigate } from "react-router-dom";
 // Definir las columnas del DataGrid
+
 const columns = [
     { field: 'id', headerName: 'ID_Pedido', width: 70, align: 'left' },
     {
@@ -78,9 +79,18 @@ const Despachados = () => {
     const handleClose = () => {
         setOpen(false);
         setCheckedProductos([]);
+        console.log('cleaning checked')
+        setSelectedPedido([]);
+        console.log(checkedProductos)
         localStorage.removeItem('selectedProductos');
         navigate("/ventas")
     };
+    /* const handleClose = () => {
+        setOpen(false);
+        setCheckedProductos([]);
+        localStorage.removeItem('selectedProductos');
+        navigate("/ventas")
+    }; */
 
     const onRowsSelectionHandler = (ids) => {
         const selectedData = ids
@@ -130,6 +140,7 @@ const Despachados = () => {
                     const pedidosFormat = productosData.map((producto) => ({
                         producto: producto.nombre,
                         cantidad: producto.cantidad,
+                        estadoDetalle: producto.estadoDetalle,
                     }));
                     const total = productosData.reduce((sum, producto) => sum + (producto.precio * producto.cantidad), 0);
                     return {
@@ -150,7 +161,7 @@ const Despachados = () => {
         }
     }, [pedidos]);
 
-    const handleDespachar = async () => {
+    const handlePagar = async () => {
         if (selectedRowsData.length > 0) {
             const productos = await fetchProductos(selectedRowsData[0].id);
             setSelectedPedido(productos);
@@ -173,7 +184,7 @@ const Despachados = () => {
         localStorage.setItem('selectedProductos', JSON.stringify(newChecked));
     };
 
-    const handleModalPagar = async () => {
+    /* const handleModalPagar = async () => {
         const pedidoId = selectedRowsData[0].id;
         try {
             // Obtener los datos del pedido actual
@@ -201,8 +212,32 @@ const Despachados = () => {
         } catch (error) {
             console.error("Error despachando productos:", error);
         }
-        navigate("/prueba")
+        navigate("/ventas")
+    }; */
+
+    const handleModalPagar = async () => {
+        try {
+            const pedidoId = selectedRowsData[0].id;
+            const response = await axios.get(`http://localhost:8085/api/v1/pedidos/${pedidoId}`);
+            const pedidoData = response.data.data;
+    
+            const updatedPedido = { ...pedidoData, estado: 'PAGADO' };
+            await axios.put(`http://localhost:8085/api/v1/pedidos`, updatedPedido);
+
+            // Actualizar la disponibilidad de la mesa a true
+            const updatedMesa = {
+                ...pedidoData.id_mesa,
+                disponibilidad: true,
+            };
+            await axios.put(`http://localhost:8085/api/v1/mesas`, updatedMesa);
+    
+            handleClose();
+        } catch (error) {
+            console.error("Error actualizando el estado del pedido:", error);
+        }
+
     };
+    
 
     useEffect(() => {
         const savedCheckedProductos = JSON.parse(localStorage.getItem('selectedProductos'));
@@ -217,7 +252,7 @@ const Despachados = () => {
     if (errorProductos) return <div>Error cargando productos: {errorProductos.message}</div>;
 
     return (
-        <div style={{ height: 260, width: '80%', marginLeft: '10%', marginTop: '2%', marginBottom: '10%' }}>
+        <div style={{ height: 300, width: '80%', marginLeft: '10%', marginTop: '2%', marginBottom: '10%' }}>
             <Typography variant="h6" gutterBottom>
                 Despachados en mesas
             </Typography>
@@ -236,7 +271,7 @@ const Despachados = () => {
             />
             <div style={{ marginTop: '5%', textAlign: 'center', marginBottom: '5%' }}>
                 <Stack direction="row" spacing={20}>
-                    <Button variant="contained" disabled={!isAnyRowSelected} onClick={handleDespachar}>
+                    <Button variant="contained" disabled={!isAnyRowSelected} onClick={handlePagar}>
                         Pagar
                     </Button>
                 </Stack>

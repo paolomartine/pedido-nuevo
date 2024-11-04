@@ -15,6 +15,8 @@ const DetallePedidoPrueba = () => {
     const [selectedRowsData, setSelectedRowsData] = useState([]);
     const [selectedPedido, setSelectedPedido] = useState([]);
     const [show, setShow] = useState(false);
+
+    
     const navigate = useNavigate();
 
     const handleClose = () => setShow(false);
@@ -24,7 +26,10 @@ const DetallePedidoPrueba = () => {
         const fetchPedidos = async () => {
             try {
                 const response = await axios.get("http://localhost:8085/api/v1/pedidos");
-                setPedidos(response.data);
+                const filteredPedidos = response.data.filter(pedido => pedido.estado === "PEDIDO");
+                setPedidos(filteredPedidos);
+               
+               
             } catch (error) {
                 console.error("Error fetching pedidos:", error);
             }
@@ -66,7 +71,8 @@ const DetallePedidoPrueba = () => {
 
     const fetchProductos = async (pedidoId) => {
         try {
-            const response = await axios.get(`http://localhost:8085/api/v1/detalepedidos/${pedidoId}/productos`);
+            const response = await axios.get(`http://localhost:8085/api/v1/detallepedidos/${pedidoId}/productos`);
+            
             return response.data;
         } catch (error) {
             console.error("Error fetching productos:", error);
@@ -95,11 +101,19 @@ const DetallePedidoPrueba = () => {
             await axios.put(`http://localhost:8085/api/v1/pedidos`, updatedPedido);
 
             handleClose();
+            navigate("/despachados")
 
         } catch (error) {
-            console.error("Error despachando productos:", error);
-        }
+            
         navigate("/pedidos")
+        
+            console.error("Error despachando productos:", error);
+            MySwal.fire({
+                title: "Error",
+                text: "Ocurrió un problema al despachar el pedido. Intente nuevamente.",
+                icon: "error",
+            });
+        }
     };
 
     return (

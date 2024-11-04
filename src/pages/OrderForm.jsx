@@ -77,7 +77,7 @@ const OrderForm = () => {
 
                     Swal.fire("Pedido terminado", "", "info");
                     limpiar();
-                    navigate("/menu")
+                    navigate("/pedidos")
                 }
             });
             console.log('Response:', response.data);

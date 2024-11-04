@@ -1,8 +1,6 @@
-import * as React from 'react';
-import ImageList from '@mui/material/ImageList';
-import ImageListItem from '@mui/material/ImageListItem';
-import ImageListItemBar from '@mui/material/ImageListItemBar';
+import React from 'react';
 import "bootstrap/dist/css/bootstrap.min.css";
+import { Card, CardImg, CardBody, CardTitle, CardText, Row, Col } from 'reactstrap';
 
 export default function TitlebarBelowImageList() {
   const [productos, setProductos] = React.useState([]);
@@ -25,36 +23,31 @@ export default function TitlebarBelowImageList() {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', backgroundColor: 'red', padding: '16px' }}>
-
-      <ImageList style={{ width: '100%', maxWidth: 500 }}>
+    <div style={{ backgroundColor: 'red', padding: '16px' }}>
+      <Row>
         {productos.map((producto) => (
-          <ImageListItem key={producto.id}>
-            <img
-              src={producto.url}
-              alt={producto.nombre}
-              loading="lazy"
-              style={{ width: '100%', height: 'auto' }}
-            />
-            <ImageListItemBar
-              title={producto.nombre}
-              subtitle={
-                <span style={{
-                  fontFamily: 'Arial, sans-serif',
-                  color: 'white',
-                  textShadow: '2px 2px black'
-                }}>
-                  {producto.descripcion}
+          <Col key={producto.id} md={4} className="mb-4">
+            <Card>
+              <CardImg
+                top
+                src={producto.url}
+                alt={producto.nombre}
+                style={{ height: 'auto', objectFit: 'cover' }}
+              />
+              <CardBody style={{ padding: '10px', maxHeight: '150px', overflowY: 'auto' }}>
+                <CardTitle tag="h5">{producto.nombre}</CardTitle>
+                <CardText>
+                  <span style={{ fontFamily: 'Arial, sans-serif', color: 'black' }}>
+                    {producto.descripcion}
+                  </span>
                   <br />
-                  Precio: ${producto.precio}
-                </span>
-              }
-              style={{ color: 'white' }}
-              position="below"
-            />
-          </ImageListItem>
+                  Precio: <strong>${producto.precio}</strong>
+                </CardText>
+              </CardBody>
+            </Card>
+          </Col>
         ))}
-      </ImageList>
+      </Row>
     </div>
   );
 }
