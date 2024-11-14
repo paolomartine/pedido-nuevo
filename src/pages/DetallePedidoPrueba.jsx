@@ -265,7 +265,7 @@ const DetallePedidoPrueba = () => {
                                 </td>
                                 <td>{pedido.destino}</td>
                                 <td>{pedido.estado}</td>
-                                <td>${pedido.total.toFixed(2)}</td>
+                                <td>${pedido.total.toFixed().toLocaleString()}</td>
                                 <td>
                                     <ButtonGroup>
                                         <Button onClick={() => { window.location.href = `/detallepedido`; }}>

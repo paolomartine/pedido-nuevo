@@ -15,7 +15,6 @@ const Despachados = () => {
     const [selectedRowsData, setSelectedRowsData] = useState([]);
     const [selectedPedido, setSelectedPedido] = useState([]);
     const [show, setShow] = useState(false);
-
     const navigate = useNavigate();
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
@@ -31,7 +30,6 @@ const Despachados = () => {
                 console.error("Error fetching pedidos:", error);
             }
         };
-
         fetchPedidos();
     }, []);
 
@@ -62,7 +60,6 @@ const Despachados = () => {
             setRows(rows);
             setLoadingProductos(false);
         };
-
         if (pedidos.length > 0) {
             generateRows();
         }
@@ -78,65 +75,35 @@ const Despachados = () => {
         }
     };
 
-    // Selección de fila del pedido
     const handleRowSelect = (pedido) => {
         setSelectedRowsData([pedido]);
         setShow(true);
         setSelectedPedido(pedido.pedidos);
     };
 
-    // Función para actualizar la mesa asociada al pedido
-    /* const actualizarMesa = async (mesaId) => {
+    const updateMesa = async (mesaId) => {
+        const disponibilidad = true;
         try {
-            const mesaResponse = await axios.get(`http://localhost:8085/api/v1/mesas/${mesaId}`);
-            const mesaData = mesaResponse.data;
+            await axios.put('http://localhost:8085/api/v1/mesas', {
+                id: mesaId,
+                disponibilidad: disponibilidad,
+            });
+        } catch (error) {
+            console.error("Error actualizando la mesa:", error);
+        }
+    };
 
-            // Actualizar la disponibilidad de la mesa a true
-            const updatedMesa = {
-                ...mesaData,
-                disponibilidad: true, // La mesa se libera (disponible)
-            };
-
-            // Actualizar la mesa en la API
-            await axios.put(`http://localhost:8085/api/v1/mesas`, updatedMesa); */
-    /* } catch (error) {
-        console.error("Error actualizando la mesa:", error);
-        MySwal.fire({
-            title: "Error",
-            text: "Ocurrió un problema al actualizar la mesa. Intente nuevamente.",
-            icon: "error",
-        }); */
-
-
-    // Función cuando se hace clic en "Pagar"
-
-
-
-
-    /* const handleModalPagar = async () => {
+    const handleModalPagar = async () => {
         const pedidoId = selectedRowsData[0].id;
-        const mesaId = selectedRowsData[0].mesaId; // Obtener el mesaId desde el pedido seleccionado
-        console.log(mesaId)
-        console.log(pedidoId)
+        const mesaId = selectedRowsData[0].mesaId;
         try {
-            // Obtener los datos del pedido actual
             const response = await axios.get(`http://localhost:8085/api/v1/pedidos/${pedidoId}`);
             const pedidoData = response.data.data;
-
-            // Actualizar el estado del pedido a "PAGADO"
-            const updatedPedido = {
-                ...pedidoData,
-                estado: 'PAGADO', // Cambiar el estado del pedido a "PAGADO"
-            };
+            const updatedPedido = { ...pedidoData, estado: 'PAGADO' };
             await axios.put(`http://localhost:8085/api/v1/pedidos`, updatedPedido);
-
-
-            // Actualizar la mesa a disponible
-            //await updateMesa(mesaId);
-
+            await updateMesa(mesaId);
             handleClose();
             navigate("/ventas");
-
         } catch (error) {
             navigate("/pedidos");
             console.error("Error procesando el pago:", error);
@@ -146,58 +113,7 @@ const Despachados = () => {
                 icon: "error",
             });
         }
-    }; */
-
-// Función para actualizar la mesa a disponible
-const updateMesa = async (mesaId) => {
-    const disponibilidad = true;  // Asumimos que la mesa pasa a estar disponible
-    console.log('Actualizando mesa con ID:', mesaId, 'Disponibilidad:', disponibilidad);
-
-    try {
-        await axios.put('http://localhost:8085/api/v1/mesas', {
-            id: mesaId,
-            disponibilidad: disponibilidad,  // Actualizamos el campo de disponibilidad
-        });
-    } catch (error) {
-        console.error("Error actualizando la mesa:", error);
-    }
-};
-
-// Función para manejar el pago y la actualización del estado de la mesa
-const handleModalPagar = async () => {
-    const pedidoId = selectedRowsData[0].id;
-    const mesaId = selectedRowsData[0].mesaId; // Obtener el mesaId desde el pedido seleccionado
-    console.log('Pedido ID:', pedidoId, 'Mesa ID:', mesaId);
-
-    try {
-        // Obtener los datos del pedido actual
-        const response = await axios.get(`http://localhost:8085/api/v1/pedidos/${pedidoId}`);
-        const pedidoData = response.data.data;
-
-        // Actualizar el estado del pedido a "PAGADO"
-        const updatedPedido = {
-            ...pedidoData,
-            estado: 'PAGADO', // Cambiar el estado del pedido a "PAGADO"
-        };
-        await axios.put(`http://localhost:8085/api/v1/pedidos`, updatedPedido);
-
-        // Actualizar la mesa a disponible
-        await updateMesa(mesaId);  // Llamamos a la función para actualizar la mesa
-
-        handleClose();  // Cerrar el modal
-        navigate("/ventas");  // Redirigir a la página de ventas
-    } catch (error) {
-        navigate("/pedidos");  // Redirigir en caso de error
-        console.error("Error procesando el pago:", error);
-        MySwal.fire({
-            title: "Error",
-            text: "Ocurrió un problema al procesar el pago. Intente nuevamente.",
-            icon: "error",
-        });
-    }
-};
-
-
+    };
 
     return (
         <div className="container">
@@ -231,17 +147,10 @@ const handleModalPagar = async () => {
                                 </td>
                                 <td>{pedido.destino}</td>
                                 <td>{pedido.estado}</td>
-                                <td>${pedido.total.toFixed(2)}</td>
+                                <td>${pedido.total.toFixed().toLocaleString()}</td>
                                 <td>
                                     <ButtonGroup>
-                                        <Button
-                                            variant="primary"
-                                            onClick={() => {
-                                                window.location.href = `/detallepedido`;
-                                            }}
-                                        >
-                                            Agregar
-                                        </Button>
+                                        <Button variant="primary" onClick={() => { window.location.href = `/detallepedido`; }}>Agregar</Button>
                                     </ButtonGroup>
                                 </td>
                             </tr>
@@ -249,7 +158,6 @@ const handleModalPagar = async () => {
                     )}
                 </tbody>
             </Table>
-
             <Modal show={show} onHide={handleClose}>
                 <Modal.Header closeButton>
                     <Modal.Title>Detalles del Pedido</Modal.Title>
@@ -262,14 +170,12 @@ const handleModalPagar = async () => {
                             </ListGroup.Item>
                         ))}
                     </ListGroup>
+                    <hr />
+                    <h5>Total del Pedido: ${selectedRowsData[0]?.total.toFixed()}</h5> {/* Muestra el total aquí */}
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant="secondary" onClick={handleClose}>
-                        Cerrar
-                    </Button>
-                    <Button variant="primary" onClick={handleModalPagar}>
-                        Pagar
-                    </Button>
+                    <Button variant="secondary" onClick={handleClose}>Cerrar</Button>
+                    <Button variant="primary" onClick={handleModalPagar}>Pagar</Button>
                 </Modal.Footer>
             </Modal>
         </div>
