@@ -15,7 +15,7 @@ const OrderForm = () => {
         producto: null,
         cantidad: 0,
         observacion: "",
-        estadoDetalle:'0'
+        estadoDetalle: '0'
     });
 
     const navigate = useNavigate();
@@ -110,7 +110,7 @@ const OrderForm = () => {
             producto: null,
             cantidad: 0,
             observacion: "",
-            estadoDetalle:'0'
+            estadoDetalle: '0'
         });
     };
 
@@ -140,7 +140,7 @@ const OrderForm = () => {
                                 className="form-select"
                                 name="idPedido"
                                 value={formData.pedido ? formData.pedido.id : ""}
-                                
+
                                 onChange={handleChange}
                                 required
                             >
@@ -171,18 +171,18 @@ const OrderForm = () => {
                             </select>
                         </div>
                         <div className="mb-3">
-    <label htmlFor="cantidad" className="form-label">Cantidad</label>
-    <input
-        type="number"
-        className="form-control"
-        id="cantidad"
-        name="cantidad"
-        value={formData.cantidad}
-        onChange={handleChange}
-        min="1" // Ensures the value is greater than 0
-        required
-    />
-</div>
+                            <label htmlFor="cantidad" className="form-label">Cantidad</label>
+                            <input
+                                type="number"
+                                className="form-control"
+                                id="cantidad"
+                                name="cantidad"
+                                value={formData.cantidad}
+                                onChange={handleChange}
+                                min="1" // Ensures the value is greater than 0
+                                required
+                            />
+                        </div>
 
 
                         <div className="mb-3">
@@ -195,7 +195,7 @@ const OrderForm = () => {
                                 value={formData.observacion}
                                 onChange={handleChange}
                             /> </div>
-                            <div className="mb-3">
+                        <div className="mb-3">
                             <label htmlFor="estadoDetalle" className="form-label">
                                 EstadoDetalle
                             </label>

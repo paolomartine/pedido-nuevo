@@ -208,7 +208,7 @@ function User() {
                             <td>{cliente.direccion}</td>
                             <td>
                                 <ButtonGroup>
-                                    <Button variant="secondary" onClick={() => editarCliente(cliente)}>Editar</Button>
+                                    <Button variant="btn btn-primary" onClick={() => editarCliente(cliente)}>Editar</Button>
                                     <Button onClick={() => {
                                         eliminar(cliente)
                                     }} variant="danger">Eliminar</Button>

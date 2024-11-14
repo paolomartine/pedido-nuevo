@@ -15,8 +15,6 @@ const DetallePedidoPrueba = () => {
     const [selectedRowsData, setSelectedRowsData] = useState([]);
     const [selectedPedido, setSelectedPedido] = useState([]);
     const [show, setShow] = useState(false);
-
-    
     const navigate = useNavigate();
 
     const handleClose = () => setShow(false);
@@ -26,15 +24,16 @@ const DetallePedidoPrueba = () => {
         const fetchPedidos = async () => {
             try {
                 const response = await axios.get("http://localhost:8085/api/v1/pedidos");
-                const filteredPedidos = response.data.filter(pedido => pedido.estado === "PEDIDO");
+                const filteredPedidos = response.data.filter(pedido => {
+                    const detallePedidosEnPedido = pedido.detallePedidos || [];
+                    const estadoDetallePedidos = detallePedidosEnPedido.some(detalle => detalle.estado === "PEDIDO");
+                    return pedido.estado === "PEDIDO" || estadoDetallePedidos;
+                });
                 setPedidos(filteredPedidos);
-               
-               
             } catch (error) {
                 console.error("Error fetching pedidos:", error);
             }
         };
-
         fetchPedidos();
     }, []);
 
@@ -45,10 +44,12 @@ const DetallePedidoPrueba = () => {
                 pedidos.map(async (pedido) => {
                     const productosData = await fetchProductos(pedido.id);
                     const pedidosFormat = productosData.map((producto) => ({
+                        id: producto.id,
                         producto: producto.nombre,
                         cantidad: producto.cantidad,
                         observacion: producto.observacion,
                         estado: producto.estadoDetalle,
+                        selected: false, 
                     }));
                     const total = productosData.reduce((sum, producto) => sum + (producto.precio * producto.cantidad), 0);
                     return {
@@ -63,7 +64,6 @@ const DetallePedidoPrueba = () => {
             setRows(rows);
             setLoadingProductos(false);
         };
-
         if (pedidos.length > 0) {
             generateRows();
         }
@@ -72,7 +72,6 @@ const DetallePedidoPrueba = () => {
     const fetchProductos = async (pedidoId) => {
         try {
             const response = await axios.get(`http://localhost:8085/api/v1/detallepedidos/${pedidoId}/productos`);
-            
             return response.data;
         } catch (error) {
             console.error("Error fetching productos:", error);
@@ -82,12 +81,15 @@ const DetallePedidoPrueba = () => {
 
     const handleRowSelect = (pedido) => {
         setSelectedRowsData([pedido]);
+        setSelectedPedido(pedido.pedidos); 
         setShow(true);
-        setSelectedPedido(pedido.pedidos);
     };
 
-    const handleModalDespachar = async () => {
+    /* const handleModalDespacharPrueba= async()=>{
         const pedidoId = selectedRowsData[0].id;
+        const mesaId = selectedRowsData[0].mesaId; // Obtener el mesaId desde el pedido seleccionado
+        console.log(mesaId)
+        console.log(pedidoId)
         try {
             // Obtener los datos del pedido actual
             const response = await axios.get(`http://localhost:8085/api/v1/pedidos/${pedidoId}`);
@@ -96,24 +98,139 @@ const DetallePedidoPrueba = () => {
             // Actualizar el estado del pedido a "DESPACHADO"
             const updatedPedido = {
                 ...pedidoData,
-                estado: 'DESPACHADO',
+                estado: 'DESPACHADO', // Cambiar el estado del pedido a "DESPACHADO"
             };
             await axios.put(`http://localhost:8085/api/v1/pedidos`, updatedPedido);
 
+
+            // Actualizar la mesa a disponible
+            //await updateMesa(mesaId);
+
             handleClose();
-            navigate("/despachados")
+            navigate("/despachados");
 
         } catch (error) {
-            
-        navigate("/pedidos")
-        
-            console.error("Error despachando productos:", error);
+            navigate("/pedidos");
+            console.error("Error procesando el pago:", error);
             MySwal.fire({
                 title: "Error",
-                text: "Ocurrió un problema al despachar el pedido. Intente nuevamente.",
+                text: "Ocurrió un problema al procesar el despacho. Intente nuevamente.",
                 icon: "error",
             });
         }
+    }; */
+
+    const handleModalDespacharPrueba = async () => {
+        const pedidoId = selectedRowsData[0].id;
+        const mesaId = selectedRowsData[0].mesaId; // Obtener el mesaId desde el pedido seleccionado
+        console.log(mesaId);
+        console.log(pedidoId);
+    
+        try {
+            // Obtener los datos del pedido actual
+            const response = await axios.get(`http://localhost:8085/api/v1/pedidos/${pedidoId}`);
+            const pedidoData = response.data.data;
+    
+            // Actualizar el estado del pedido a "DESPACHADO"
+            const updatedPedido = {
+                ...pedidoData,
+                estado: 'DESPACHADO', // Cambiar el estado del pedido a "DESPACHADO"
+            };
+            await axios.put(`http://localhost:8085/api/v1/pedidos`, updatedPedido);
+    
+            // Despachar productos del pedido (esto actualizará el estado del producto a "DESPACHADO")
+            /* for (const producto of selectedRowsData[0].productos) {
+                if (producto.selected) {  // Solo despachar productos seleccionados
+                    await axios.put(`http://localhost:8085/api/v1/detallepedidos/${pedidoId}/productos/${producto.id}`);
+                }
+            } */
+    
+            handleClose();
+            navigate("/despachados");
+        } catch (error) {
+            navigate("/pedidos");
+            console.error("Error procesando el despacho:", error);
+            MySwal.fire({
+                title: "Error",
+                text: "Ocurrió un problema al procesar el despacho. Intente nuevamente.",
+                icon: "error",
+            });
+        }
+    };
+    
+
+    const handleModalDespachar = async () => {
+        const selectedProductos = selectedPedido.filter(producto => producto.selected);
+        console.log("Productos seleccionados: ", selectedProductos);
+
+        if (selectedProductos.length === 0) {
+            MySwal.fire({
+                title: "Error",
+                text: "Por favor, seleccione al menos un producto para despachar.",
+                icon: "error",
+            });
+            return;
+        }
+
+        const confirmDespachar = await MySwal.fire({
+            title: '¿Deseas despachar los productos seleccionados?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, despachar',
+            cancelButtonText: 'No',
+        });
+
+        if (confirmDespachar.isConfirmed) {
+            try {
+                const promises = selectedProductos.map((producto) => {
+                    if (!producto.id) {
+                        console.log("Producto no tiene id:", producto);
+                        producto.estado = 1;
+                        return Promise.resolve();
+                    }
+
+                    const updatedProducto = {
+                        ...producto,
+                        estado_detalle: "DESPACHADO", 
+                    };
+
+                    return axios.put(`http://localhost:8085/api/v1/detallepedidos/${producto.id}`, updatedProducto)
+                        .then(() => {
+                            MySwal.fire({
+                                title: "<strong>Actualización exitosa!!!</strong>",
+                                html: `<i><strong> El producto ${producto.nombre} fue despachado con éxito! </i>`,
+                                icon: "success",
+                            });
+                        })
+                        .catch((error) => {
+                            console.error(`Error al actualizar producto con id ${producto.id}:`, error);
+                            MySwal.fire({
+                                title: "Error",
+                                text: `Hubo un problema al despachar el producto ${producto.nombre}.`,
+                                icon: "error",
+                            });
+                        });
+                });
+
+                await Promise.all(promises);
+                console.log('Todos los productos han sido actualizados correctamente.');
+                handleClose();  
+                navigate("/despachados");  
+            } catch (error) {
+                console.error("Error despachando productos:", error);
+                MySwal.fire({
+                    title: "Error",
+                    text: "Ocurrió un problema al despachar los productos. Intente nuevamente.",
+                    icon: "error",
+                });
+            }
+        }
+    };
+
+    const handleSelectProducto = (index) => {
+        const updatedPedido = [...selectedPedido];
+        updatedPedido[index].selected = !updatedPedido[index].selected;
+        setSelectedPedido(updatedPedido);
     };
 
     return (
@@ -142,7 +259,7 @@ const DetallePedidoPrueba = () => {
                                 <td>
                                     {pedido.pedidos.map((producto, index) => (
                                         <div key={index}>
-                                            {producto.producto} (Cantidad: {producto.cantidad})
+                                            {producto.producto} (Cant: {producto.cantidad}) {producto.observacion}
                                         </div>
                                     ))}
                                 </td>
@@ -151,14 +268,8 @@ const DetallePedidoPrueba = () => {
                                 <td>${pedido.total.toFixed(2)}</td>
                                 <td>
                                     <ButtonGroup>
-                                        <Button 
-                                            variant="primary" 
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                handleShow();
-                                            }} 
-                                        >
-                                            Despachar
+                                        <Button onClick={() => { window.location.href = `/detallepedido`; }}>
+                                            Agregar
                                         </Button>
                                     </ButtonGroup>
                                 </td>
@@ -176,7 +287,12 @@ const DetallePedidoPrueba = () => {
                     <ListGroup>
                         {selectedPedido.map((producto, index) => (
                             <ListGroup.Item key={index}>
-                                {producto.producto} (Cantidad: {producto.cantidad})
+                                <input
+                                    type="checkbox"
+                                    checked={producto.selected || false}
+                                    onChange={() => handleSelectProducto(index)}
+                                />
+                                {producto.descripcion} {producto.producto} (Cantidad: {producto.cantidad})
                             </ListGroup.Item>
                         ))}
                     </ListGroup>
@@ -185,7 +301,7 @@ const DetallePedidoPrueba = () => {
                     <Button variant="secondary" onClick={handleClose}>
                         Cerrar
                     </Button>
-                    <Button variant="primary" onClick={handleModalDespachar}>
+                    <Button variant="primary" onClick={handleModalDespacharPrueba}>
                         Despachar
                     </Button>
                 </Modal.Footer>

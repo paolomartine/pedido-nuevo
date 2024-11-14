@@ -141,7 +141,7 @@ function Table() {
                 <div className="card-footer text-muted">
                     {editar ? (
                         <div>
-                            <Button className="btn btn-warning m-2" onClick={update}>Actualizar</Button>
+                            <Button className="btn btn-primary" onClick={update}>Actualizar</Button>
                             <Button className="btn btn-info m-2" onClick={limpiarCampos}>Cancelar</Button>
                         </div>
                     ) : (
@@ -166,7 +166,7 @@ function Table() {
                             </td>
                             <td>
                                 <ButtonGroup>
-                                    <Button variant="secondary" onClick={() => editarMesa(mesa)}>Seleccionar</Button>
+                                    <Button variant="btn btn-primary" onClick={() => editarMesa(mesa)}>Seleccionar</Button>
                                     <Button variant="danger" onClick={() => eliminar(mesa)}>Eliminar</Button>
                                 </ButtonGroup>
                             </td>

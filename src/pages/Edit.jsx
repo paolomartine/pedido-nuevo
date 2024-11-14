@@ -234,7 +234,7 @@ function Edit() {
                             <td>{producto.precio}</td>
                             <td>
                                 <ButtonGroup>
-                                    <Button variant="secondary" onClick={() => editarProducto(producto)}>Editar</Button>
+                                    <Button variant=" warning btn-primary" onClick={() => editarProducto(producto)}>Editar</Button>
                                     <Button onClick={() => {
                                         eliminar(producto)
                                     }} variant="danger">Eliminar</Button>

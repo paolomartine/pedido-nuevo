@@ -1,136 +1,41 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { DataGrid } from '@mui/x-data-grid';
-import { Typography, Stack, Box, Modal, List, ListItem, ListItemText, Checkbox } from '@mui/material';
-import Swal from 'sweetalert2';
-import { Button } from "react-bootstrap";
+import { Button, ButtonGroup, Modal, ListGroup, Table } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
+import Swal from "sweetalert2";
+import withReactContent from "sweetalert2-react-content";
 import { useNavigate } from "react-router-dom";
-// Definir las columnas del DataGrid
 
-const columns = [
-    { field: 'id', headerName: 'ID_Pedido', width: 70, align: 'left' },
-    {
-        field: 'pedidos',
-        headerName: 'Productos Despachados',
-        width: 300,
-        renderCell: (params) => (
-            <div>
-                {params.row.pedidos.map((pedido, index) => (
-                    <span key={index}>
-                        <Typography noWrap>
-                            {pedido.producto} ({pedido.cantidad})
-                        </Typography>
-                    </span>
-                ))}
-            </div>
-        ),
-    },
-    { field: 'destino', headerName: 'Destino', width: 120 },
-    { field: 'estado', headerName: 'Estado', width: 120 },
-    { field: 'total', headerName: 'Total', type: 'number', width: 120 },
-    { field: 'acciones', headerName: 'Acciones', width: 150,
-        renderCell: (params) => (
-            <div>
-            <span>
-                <Button
-                    onClick={() => {
-                        window.location.href = `/detallepedido`;
-                    }}
-                >
-                    Adicionar
-                </Button>
-            </span>
-        </div>
-        ),
-     },
-
-];
-
-// Estilos para el modal
-const modalStyle = {
-    position: 'absolute',
-    top: '50%',
-    left: '50%',
-    transform: 'translate(-50%, -50%)',
-    width: 400,
-    bgcolor: 'background.paper',
-    border: '2px solid #000',
-    boxShadow: 24,
-    p: 4,
-};
+const MySwal = withReactContent(Swal);
 
 const Despachados = () => {
-    const [isAnyRowSelected, setIsAnyRowSelected] = useState(false);
-    const [selectedRowsData, setSelectedRowsData] = useState([]);
-    const [selectedPedido, setSelectedPedido] = useState([]);
-    const [checkedProductos, setCheckedProductos] = useState([]);
     const [pedidos, setPedidos] = useState([]);
     const [rows, setRows] = useState([]);
-    const [loadingPedidos, setLoadingPedidos] = useState(true);
     const [loadingProductos, setLoadingProductos] = useState(false);
-    const [errorPedidos, setErrorPedidos] = useState(null);
-    const [errorProductos, setErrorProductos] = useState(null);
-    const [open, setOpen] = useState(false);
+    const [selectedRowsData, setSelectedRowsData] = useState([]);
+    const [selectedPedido, setSelectedPedido] = useState([]);
+    const [show, setShow] = useState(false);
 
     const navigate = useNavigate();
+    const handleClose = () => setShow(false);
+    const handleShow = () => setShow(true);
 
-    const handleOpen = () => setOpen(true);
-    const handleClose = () => {
-        setOpen(false);
-        setCheckedProductos([]);
-        console.log('cleaning checked')
-        setSelectedPedido([]);
-        console.log(checkedProductos)
-        localStorage.removeItem('selectedProductos');
-        navigate("/ventas")
-    };
-    /* const handleClose = () => {
-        setOpen(false);
-        setCheckedProductos([]);
-        localStorage.removeItem('selectedProductos');
-        navigate("/ventas")
-    }; */
-
-    const onRowsSelectionHandler = (ids) => {
-        const selectedData = ids
-            .map((id) => rows.find((row) => row.id === id))
-            .filter((row) => row !== undefined);
-
-        setIsAnyRowSelected(ids.length > 0);
-        setSelectedRowsData(selectedData);
-    };
-
-    useEffect(() => {
-        console.log(selectedRowsData);
-    }, [selectedRowsData]);
-
+    // Obtener los pedidos despachados
     useEffect(() => {
         const fetchPedidos = async () => {
             try {
                 const response = await axios.get("http://localhost:8085/api/v1/pedidos");
                 const filteredPedidos = response.data.filter(pedido => pedido.estado === "DESPACHADO");
                 setPedidos(filteredPedidos);
-                setLoadingPedidos(false);
             } catch (error) {
-                setErrorPedidos(error);
-                setLoadingPedidos(false);
+                console.error("Error fetching pedidos:", error);
             }
         };
+
         fetchPedidos();
     }, []);
 
-   
-    const fetchProductos = async (pedidoId) => {
-        try {
-            const response = await axios.get(`http://localhost:8085/api/v1/detallepedidos/${pedidoId}/productos`);
-            return response.data;
-        } catch (error) {
-            setErrorProductos(error);
-            return [];
-        }
-    };
-
+    // Generar las filas de la tabla
     useEffect(() => {
         const generateRows = async () => {
             setLoadingProductos(true);
@@ -140,7 +45,8 @@ const Despachados = () => {
                     const pedidosFormat = productosData.map((producto) => ({
                         producto: producto.nombre,
                         cantidad: producto.cantidad,
-                        estadoDetalle: producto.estadoDetalle,
+                        observacion: producto.observacion,
+                        estado: producto.estadoDetalle,
                     }));
                     const total = productosData.reduce((sum, producto) => sum + (producto.precio * producto.cantidad), 0);
                     return {
@@ -149,6 +55,7 @@ const Despachados = () => {
                         destino: `Mesa ${pedido.id_mesa.id}`,
                         estado: pedido.estado,
                         total: total,
+                        mesaId: pedido.id_mesa.id // Agregar mesaId para su uso posterior
                     };
                 })
             );
@@ -161,31 +68,56 @@ const Despachados = () => {
         }
     }, [pedidos]);
 
-    const handlePagar = async () => {
-        if (selectedRowsData.length > 0) {
-            const productos = await fetchProductos(selectedRowsData[0].id);
-            setSelectedPedido(productos);
-            handleOpen();
-            
+    const fetchProductos = async (pedidoId) => {
+        try {
+            const response = await axios.get(`http://localhost:8085/api/v1/detallepedidos/${pedidoId}/productos`);
+            return response.data;
+        } catch (error) {
+            console.error("Error fetching productos:", error);
+            return [];
         }
     };
 
-    const handleToggle = (producto) => () => {
-        const currentIndex = checkedProductos.indexOf(producto);
-        const newChecked = [...checkedProductos];
-
-        if (currentIndex === -1) {
-            newChecked.push(producto);
-        } else {
-            newChecked.splice(currentIndex, 1);
-        }
-
-        setCheckedProductos(newChecked);
-        localStorage.setItem('selectedProductos', JSON.stringify(newChecked));
+    // Selección de fila del pedido
+    const handleRowSelect = (pedido) => {
+        setSelectedRowsData([pedido]);
+        setShow(true);
+        setSelectedPedido(pedido.pedidos);
     };
+
+    // Función para actualizar la mesa asociada al pedido
+    /* const actualizarMesa = async (mesaId) => {
+        try {
+            const mesaResponse = await axios.get(`http://localhost:8085/api/v1/mesas/${mesaId}`);
+            const mesaData = mesaResponse.data;
+
+            // Actualizar la disponibilidad de la mesa a true
+            const updatedMesa = {
+                ...mesaData,
+                disponibilidad: true, // La mesa se libera (disponible)
+            };
+
+            // Actualizar la mesa en la API
+            await axios.put(`http://localhost:8085/api/v1/mesas`, updatedMesa); */
+    /* } catch (error) {
+        console.error("Error actualizando la mesa:", error);
+        MySwal.fire({
+            title: "Error",
+            text: "Ocurrió un problema al actualizar la mesa. Intente nuevamente.",
+            icon: "error",
+        }); */
+
+
+    // Función cuando se hace clic en "Pagar"
+
+
+
 
     /* const handleModalPagar = async () => {
         const pedidoId = selectedRowsData[0].id;
+        const mesaId = selectedRowsData[0].mesaId; // Obtener el mesaId desde el pedido seleccionado
+        console.log(mesaId)
+        console.log(pedidoId)
         try {
             // Obtener los datos del pedido actual
             const response = await axios.get(`http://localhost:8085/api/v1/pedidos/${pedidoId}`);
@@ -194,128 +126,154 @@ const Despachados = () => {
             // Actualizar el estado del pedido a "PAGADO"
             const updatedPedido = {
                 ...pedidoData,
-                estado: 'PAGADO',
+                estado: 'PAGADO', // Cambiar el estado del pedido a "PAGADO"
             };
             await axios.put(`http://localhost:8085/api/v1/pedidos`, updatedPedido);
 
-            // Actualizar la disponibilidad de la mesa a true
-            const updatedMesa = {
-                ...pedidoData.id_mesa,
-                disponibilidad: true,
-            };
-            await axios.put(`http://localhost:8085/api/v1/mesas`, updatedMesa);
 
-            console.log("Productos PAGADOS:", checkedProductos);
+            // Actualizar la mesa a disponible
+            //await updateMesa(mesaId);
+
             handleClose();
-            
+            navigate("/ventas");
 
         } catch (error) {
-            console.error("Error despachando productos:", error);
+            navigate("/pedidos");
+            console.error("Error procesando el pago:", error);
+            MySwal.fire({
+                title: "Error",
+                text: "Ocurrió un problema al procesar el pago. Intente nuevamente.",
+                icon: "error",
+            });
         }
-        navigate("/ventas")
     }; */
 
-    const handleModalPagar = async () => {
-        try {
-            const pedidoId = selectedRowsData[0].id;
-            const response = await axios.get(`http://localhost:8085/api/v1/pedidos/${pedidoId}`);
-            const pedidoData = response.data.data;
-    
-            const updatedPedido = { ...pedidoData, estado: 'PAGADO' };
-            await axios.put(`http://localhost:8085/api/v1/pedidos`, updatedPedido);
+// Función para actualizar la mesa a disponible
+const updateMesa = async (mesaId) => {
+    const disponibilidad = true;  // Asumimos que la mesa pasa a estar disponible
+    console.log('Actualizando mesa con ID:', mesaId, 'Disponibilidad:', disponibilidad);
 
-            // Actualizar la disponibilidad de la mesa a true
-            const updatedMesa = {
-                ...pedidoData.id_mesa,
-                disponibilidad: true,
-            };
-            await axios.put(`http://localhost:8085/api/v1/mesas`, updatedMesa);
-    
-            handleClose();
-        } catch (error) {
-            console.error("Error actualizando el estado del pedido:", error);
-        }
+    try {
+        await axios.put('http://localhost:8085/api/v1/mesas', {
+            id: mesaId,
+            disponibilidad: disponibilidad,  // Actualizamos el campo de disponibilidad
+        });
+    } catch (error) {
+        console.error("Error actualizando la mesa:", error);
+    }
+};
 
-    };
-    
+// Función para manejar el pago y la actualización del estado de la mesa
+const handleModalPagar = async () => {
+    const pedidoId = selectedRowsData[0].id;
+    const mesaId = selectedRowsData[0].mesaId; // Obtener el mesaId desde el pedido seleccionado
+    console.log('Pedido ID:', pedidoId, 'Mesa ID:', mesaId);
 
-    useEffect(() => {
-        const savedCheckedProductos = JSON.parse(localStorage.getItem('selectedProductos'));
-        if (savedCheckedProductos) {
-            setCheckedProductos(savedCheckedProductos);
-        }
-    }, [open]);
+    try {
+        // Obtener los datos del pedido actual
+        const response = await axios.get(`http://localhost:8085/api/v1/pedidos/${pedidoId}`);
+        const pedidoData = response.data.data;
 
-    if (loadingPedidos) return <div>Cargando pedidos...</div>;
-    if (errorPedidos) return <div>Error cargando pedidos: {errorPedidos.message}</div>;
-    if (loadingProductos) return <div>Cargando productos...</div>;
-    if (errorProductos) return <div>Error cargando productos: {errorProductos.message}</div>;
+        // Actualizar el estado del pedido a "PAGADO"
+        const updatedPedido = {
+            ...pedidoData,
+            estado: 'PAGADO', // Cambiar el estado del pedido a "PAGADO"
+        };
+        await axios.put(`http://localhost:8085/api/v1/pedidos`, updatedPedido);
+
+        // Actualizar la mesa a disponible
+        await updateMesa(mesaId);  // Llamamos a la función para actualizar la mesa
+
+        handleClose();  // Cerrar el modal
+        navigate("/ventas");  // Redirigir a la página de ventas
+    } catch (error) {
+        navigate("/pedidos");  // Redirigir en caso de error
+        console.error("Error procesando el pago:", error);
+        MySwal.fire({
+            title: "Error",
+            text: "Ocurrió un problema al procesar el pago. Intente nuevamente.",
+            icon: "error",
+        });
+    }
+};
+
+
 
     return (
-        <div style={{ height: 300, width: '80%', marginLeft: '10%', marginTop: '2%', marginBottom: '10%' }}>
-            <Typography variant="h6" gutterBottom>
-                Despachados en mesas
-            </Typography>
-            <DataGrid
-                rows={rows}
-                columns={columns}
-                getRowHeight={() => 'auto'}
-                initialState={{
-                    pagination: {
-                        paginationModel: { page: 0, pageSize: 5 }
-                    },
-                }}
-                pageSizeOptions={[5, 10]}
-                onRowSelectionModelChange={(ids) => onRowsSelectionHandler(ids)}
-                checkboxSelection
-            />
-            <div style={{ marginTop: '5%', textAlign: 'center', marginBottom: '5%' }}>
-                <Stack direction="row" spacing={20}>
-                    <Button variant="contained" disabled={!isAnyRowSelected} onClick={handlePagar}>
-                        Pagar
-                    </Button>
-                </Stack>
-            </div>
-            <Modal
-                open={open}
-                onClose={handleClose}
-                aria-labelledby="modal-modal-title"
-                aria-describedby="modal-modal-description"
-            >
-                <Box sx={modalStyle}>
-                    <Typography id="modal-modal-title" variant="h6" component="h2">
-                        Detalles del Despacho
-                    </Typography>
-                    <List>
-                        {selectedPedido && selectedPedido.map((producto, index) => (
-                            <ListItem key={index} onClick={handleToggle(producto)}>
-                                <Checkbox
-                                    edge="start"
-                                    checked={checkedProductos.indexOf(producto) !== -1}
-                                    tabIndex={-1}
-                                    disableRipple
-                                />
-                                <ListItemText
-                                    primary={`Producto: ${producto.nombre} (Cantidad: ${producto.cantidad})`}
-                                    secondary={`Total: $${(producto.precio * producto.cantidad)}`}
-                                />
-                            </ListItem>
-                        ))}
-                    </List>
+        <div className="container">
+            <h2>Detalles de Pedidos</h2>
+            <Table striped bordered hover>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Productos pedidos</th>
+                        <th>Destino</th>
+                        <th>Estado</th>
+                        <th>Total</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {loadingProductos ? (
+                        <tr>
+                            <td colSpan="6">Cargando...</td>
+                        </tr>
+                    ) : (
+                        rows.map((pedido) => (
+                            <tr key={pedido.id} onClick={() => handleRowSelect(pedido)}>
+                                <td>{pedido.id}</td>
+                                <td>
+                                    {pedido.pedidos.map((producto, index) => (
+                                        <div key={index}>
+                                            {producto.producto} (Cantidad: {producto.cantidad})
+                                        </div>
+                                    ))}
+                                </td>
+                                <td>{pedido.destino}</td>
+                                <td>{pedido.estado}</td>
+                                <td>${pedido.total.toFixed(2)}</td>
+                                <td>
+                                    <ButtonGroup>
+                                        <Button
+                                            variant="primary"
+                                            onClick={() => {
+                                                window.location.href = `/detallepedido`;
+                                            }}
+                                        >
+                                            Agregar
+                                        </Button>
+                                    </ButtonGroup>
+                                </td>
+                            </tr>
+                        ))
+                    )}
+                </tbody>
+            </Table>
 
-                    <Button
-                        variant="contained"
-                        color="primary"
-                        onClick={handleModalPagar}
-                        disabled={checkedProductos.length !== selectedPedido.length}
-                    >
+            <Modal show={show} onHide={handleClose}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Detalles del Pedido</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <ListGroup>
+                        {selectedPedido.map((producto, index) => (
+                            <ListGroup.Item key={index}>
+                                {producto.producto} (Cantidad: {producto.cantidad})
+                            </ListGroup.Item>
+                        ))}
+                    </ListGroup>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={handleClose}>
+                        Cerrar
+                    </Button>
+                    <Button variant="primary" onClick={handleModalPagar}>
                         Pagar
                     </Button>
-                </Box>
+                </Modal.Footer>
             </Modal>
         </div>
     );
 };
 
-export default Despachados; 
-
+export default Despachados;
