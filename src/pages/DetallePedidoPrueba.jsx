@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Button, ButtonGroup, Modal, ListGroup, Table } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -85,40 +85,7 @@ const DetallePedidoPrueba = () => {
         setShow(true);
     };
 
-    /* const handleModalDespacharPrueba= async()=>{
-        const pedidoId = selectedRowsData[0].id;
-        const mesaId = selectedRowsData[0].mesaId; // Obtener el mesaId desde el pedido seleccionado
-        console.log(mesaId)
-        console.log(pedidoId)
-        try {
-            // Obtener los datos del pedido actual
-            const response = await axios.get(`http://localhost:8085/api/v1/pedidos/${pedidoId}`);
-            const pedidoData = response.data.data;
-
-            // Actualizar el estado del pedido a "DESPACHADO"
-            const updatedPedido = {
-                ...pedidoData,
-                estado: 'DESPACHADO', // Cambiar el estado del pedido a "DESPACHADO"
-            };
-            await axios.put(`http://localhost:8085/api/v1/pedidos`, updatedPedido);
-
-
-            // Actualizar la mesa a disponible
-            //await updateMesa(mesaId);
-
-            handleClose();
-            navigate("/despachados");
-
-        } catch (error) {
-            navigate("/pedidos");
-            console.error("Error procesando el pago:", error);
-            MySwal.fire({
-                title: "Error",
-                text: "Ocurrió un problema al procesar el despacho. Intente nuevamente.",
-                icon: "error",
-            });
-        }
-    }; */
+    
 
     const handleModalDespacharPrueba = async () => {
         const pedidoId = selectedRowsData[0].id;
@@ -138,12 +105,7 @@ const DetallePedidoPrueba = () => {
             };
             await axios.put(`http://localhost:8085/api/v1/pedidos`, updatedPedido);
     
-            // Despachar productos del pedido (esto actualizará el estado del producto a "DESPACHADO")
-            /* for (const producto of selectedRowsData[0].productos) {
-                if (producto.selected) {  // Solo despachar productos seleccionados
-                    await axios.put(`http://localhost:8085/api/v1/detallepedidos/${pedidoId}/productos/${producto.id}`);
-                }
-            } */
+            
     
             handleClose();
             navigate("/despachados");
@@ -233,9 +195,31 @@ const DetallePedidoPrueba = () => {
         setSelectedPedido(updatedPedido);
     };
 
+    const handleEliminarPedido = async (pedidoId) => {
+        try {
+            await axios.delete(`http://localhost:8085/api/v1/pedidos/${pedidoId}`);
+            setPedidos(prevPedidos => prevPedidos.filter(pedido => pedido.id !== pedidoId));  // Actualiza el estado localmente
+            MySwal.fire({
+                title: "Pedido Eliminado",
+                text: "El pedido ha sido eliminado exitosamente.",
+                icon: "success",
+            });
+        } catch (error) {
+            console.error("Error eliminando el pedido:", error);
+            MySwal.fire({
+                title: "Error",
+                text: "Hubo un problema al eliminar el pedido. Intente nuevamente.",
+                icon: "error",
+            });
+        }
+    };
+
     return (
         <div className="container">
-            <h2>Detalles de Pedidos</h2>
+            <div className="card text-center">
+                <div className="card-header">Gestión de Pedidos</div>
+            </div>
+            
             <Table striped bordered hover>
                 <thead>
                     <tr>
@@ -271,6 +255,13 @@ const DetallePedidoPrueba = () => {
                                         <Button onClick={() => { window.location.href = `/detallepedido`; }}>
                                             Agregar
                                         </Button>
+                                        <Button variant="danger" onClick={(e) => {
+                                            e.stopPropagation(); // Prevent triggering row select
+                                            handleEliminarPedido(pedido.id);
+                                        }}>
+                                            Eliminar
+                                        </Button>
+
                                     </ButtonGroup>
                                 </td>
                             </tr>
@@ -311,3 +302,7 @@ const DetallePedidoPrueba = () => {
 };
 
 export default DetallePedidoPrueba;
+ 
+
+
+

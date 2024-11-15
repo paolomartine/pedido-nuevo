@@ -178,7 +178,7 @@ const Ventas = () => {
 }
 
     return (
-        <div style={{ height: 400, width: '80%', marginLeft: '10%', marginTop: '2%', marginBottom: '10%' }}>
+        <div style={{ height: 250, width: '80%', marginLeft: '10%', marginTop: '2%', marginBottom: '10%' }}>
             <Typography variant="h6" gutterBottom>
                 Ventas
             </Typography>

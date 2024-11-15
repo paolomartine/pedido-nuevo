@@ -21,7 +21,7 @@ const Header = ({ brand }) => {
         </Button>
 
         <Button component={Link} to="/editar" variant="contained" style={{ marginBottom: '16px' }}>
-         Productos
+          Productos
         </Button>
         <Button component={Link} to="/Clientes" variant="contained" style={{ marginBottom: '16px' }}>
           Clientes
@@ -44,11 +44,6 @@ const Header = ({ brand }) => {
         <Button component={Link} to="/envios" variant="contained" style={{ marginBottom: '16px' }}>
           Envios
         </Button>
-        
-        <Button component={Link} to="/prueba" variant="contained" style={{ marginBottom: '16px' }}>
-          totales
-        </Button>
-
       </Container>
 
     </Box>

@@ -117,7 +117,9 @@ const Despachados = () => {
 
     return (
         <div className="container">
-            <h2>Detalles de Pedidos</h2>
+            <div className="card text-center">
+                <div className="card-header">Gestión de Despachos</div>
+            </div>
             <Table striped bordered hover>
                 <thead>
                     <tr>
