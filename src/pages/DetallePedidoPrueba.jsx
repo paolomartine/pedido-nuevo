@@ -1,4 +1,4 @@
- import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Button, ButtonGroup, Modal, ListGroup, Table } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -24,11 +24,17 @@ const DetallePedidoPrueba = () => {
         const fetchPedidos = async () => {
             try {
                 const response = await axios.get("http://localhost:8085/api/v1/pedidos");
+
+                // Filtramos los pedidos para que solo incluyan aquellos con estado "PEDIDO" 
+                // o aquellos que tienen el campo "borrado" igual a true
                 const filteredPedidos = response.data.filter(pedido => {
                     const detallePedidosEnPedido = pedido.detallePedidos || [];
                     const estadoDetallePedidos = detallePedidosEnPedido.some(detalle => detalle.estado === "PEDIDO");
-                    return pedido.estado === "PEDIDO" || estadoDetallePedidos;
+
+                    // Filtramos por estado "PEDIDO" o "borrado = true"
+                    return pedido.estado === "PEDIDO" && pedido.borrado === false || estadoDetallePedidos;
                 });
+
                 setPedidos(filteredPedidos);
             } catch (error) {
                 console.error("Error fetching pedidos:", error);
@@ -36,6 +42,7 @@ const DetallePedidoPrueba = () => {
         };
         fetchPedidos();
     }, []);
+
 
     useEffect(() => {
         const generateRows = async () => {
@@ -49,7 +56,7 @@ const DetallePedidoPrueba = () => {
                         cantidad: producto.cantidad,
                         observacion: producto.observacion,
                         estado: producto.estadoDetalle,
-                        selected: false, 
+                        selected: false,
                     }));
                     const total = productosData.reduce((sum, producto) => sum + (producto.precio * producto.cantidad), 0);
                     return {
@@ -81,32 +88,29 @@ const DetallePedidoPrueba = () => {
 
     const handleRowSelect = (pedido) => {
         setSelectedRowsData([pedido]);
-        setSelectedPedido(pedido.pedidos); 
+        setSelectedPedido(pedido.pedidos);
         setShow(true);
     };
 
-    
+
 
     const handleModalDespacharPrueba = async () => {
         const pedidoId = selectedRowsData[0].id;
         const mesaId = selectedRowsData[0].mesaId; // Obtener el mesaId desde el pedido seleccionado
         console.log(mesaId);
         console.log(pedidoId);
-    
+
         try {
             // Obtener los datos del pedido actual
             const response = await axios.get(`http://localhost:8085/api/v1/pedidos/${pedidoId}`);
             const pedidoData = response.data.data;
-    
+
             // Actualizar el estado del pedido a "DESPACHADO"
             const updatedPedido = {
                 ...pedidoData,
                 estado: 'DESPACHADO', // Cambiar el estado del pedido a "DESPACHADO"
             };
             await axios.put(`http://localhost:8085/api/v1/pedidos`, updatedPedido);
-    
-            
-    
             handleClose();
             navigate("/despachados");
         } catch (error) {
@@ -119,75 +123,11 @@ const DetallePedidoPrueba = () => {
             });
         }
     };
-    
 
-    const handleModalDespachar = async () => {
-        const selectedProductos = selectedPedido.filter(producto => producto.selected);
-        console.log("Productos seleccionados: ", selectedProductos);
 
-        if (selectedProductos.length === 0) {
-            MySwal.fire({
-                title: "Error",
-                text: "Por favor, seleccione al menos un producto para despachar.",
-                icon: "error",
-            });
-            return;
-        }
 
-        const confirmDespachar = await MySwal.fire({
-            title: '¿Deseas despachar los productos seleccionados?',
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonText: 'Sí, despachar',
-            cancelButtonText: 'No',
-        });
 
-        if (confirmDespachar.isConfirmed) {
-            try {
-                const promises = selectedProductos.map((producto) => {
-                    if (!producto.id) {
-                        console.log("Producto no tiene id:", producto);
-                        producto.estado = 1;
-                        return Promise.resolve();
-                    }
 
-                    const updatedProducto = {
-                        ...producto,
-                        estado_detalle: "DESPACHADO", 
-                    };
-
-                    return axios.put(`http://localhost:8085/api/v1/detallepedidos/${producto.id}`, updatedProducto)
-                        .then(() => {
-                            MySwal.fire({
-                                title: "<strong>Actualización exitosa!!!</strong>",
-                                html: `<i><strong> El producto ${producto.nombre} fue despachado con éxito! </i>`,
-                                icon: "success",
-                            });
-                        })
-                        .catch((error) => {
-                            console.error(`Error al actualizar producto con id ${producto.id}:`, error);
-                            MySwal.fire({
-                                title: "Error",
-                                text: `Hubo un problema al despachar el producto ${producto.nombre}.`,
-                                icon: "error",
-                            });
-                        });
-                });
-
-                await Promise.all(promises);
-                console.log('Todos los productos han sido actualizados correctamente.');
-                handleClose();  
-                navigate("/despachados");  
-            } catch (error) {
-                console.error("Error despachando productos:", error);
-                MySwal.fire({
-                    title: "Error",
-                    text: "Ocurrió un problema al despachar los productos. Intente nuevamente.",
-                    icon: "error",
-                });
-            }
-        }
-    };
 
     const handleSelectProducto = (index) => {
         const updatedPedido = [...selectedPedido];
@@ -195,31 +135,138 @@ const DetallePedidoPrueba = () => {
         setSelectedPedido(updatedPedido);
     };
 
-    const handleEliminarPedido = async (pedidoId) => {
+    /* const handleEliminarPedido = async (pedidoId) => {
+        
         try {
-            await axios.delete(`http://localhost:8085/api/v1/pedidos/${pedidoId}`);
-            setPedidos(prevPedidos => prevPedidos.filter(pedido => pedido.id !== pedidoId));  // Actualiza el estado localmente
+            // Llamamos a la API para marcar el pedido como borrado lógico
+            const response = await axios.put(`http://localhost:8085/api/v1/pedidos/${pedidoId}/borrar`);
+            
+            // Actualizamos el estado de los pedidos en la UI
+            setPedidos(prevPedidos => prevPedidos.filter(pedido => pedido.id !== pedidoId));  // Eliminamos el pedido de la lista en la interfaz
+    
+            // Mostramos un mensaje de éxito
             MySwal.fire({
-                title: "Pedido Eliminado",
-                text: "El pedido ha sido eliminado exitosamente.",
+                title: "Pedido Marcado como Borrado",
+                text: "El pedido ha sido marcado como borrado con éxito.",
                 icon: "success",
             });
         } catch (error) {
-            console.error("Error eliminando el pedido:", error);
+            console.error("Error al marcar el pedido como borrado:", error);
             MySwal.fire({
                 title: "Error",
-                text: "Hubo un problema al eliminar el pedido. Intente nuevamente.",
+                text: "Hubo un problema al procesar el borrado lógico del pedido. Intente nuevamente.",
+                icon: "error",
+            });
+        }
+    }; */
+
+    /* const handleEliminarPedido = async (pedidoId, mesaId) => {
+        try {
+            // 1. Llamamos a la API para marcar el pedido como borrado lógico
+            await axios.put(`http://localhost:8085/api/v1/pedidos/${pedidoId}/borrar`);
+    
+            // 2. Actualizar la mesa asignada para marcarla como disponible
+            await updateMesaDisponibilidad(mesaId, true); // 'true' indica que la mesa está disponible
+    
+            // 3. Actualizamos el estado de los pedidos en la UI eliminando el pedido de la lista
+            setPedidos(prevPedidos => prevPedidos.filter(pedido => pedido.id !== pedidoId));
+    
+            // 4. Mostramos un mensaje de éxito
+            MySwal.fire({
+                title: "Pedido Marcado como Borrado",
+                text: "El pedido ha sido marcado como borrado con éxito y la mesa está ahora disponible.",
+                icon: "success",
+            });
+        } catch (error) {
+            console.error("Error al marcar el pedido como borrado:", error);
+            MySwal.fire({
+                title: "Error",
+                text: "Hubo un problema al procesar el borrado lógico del pedido y la actualización de la mesa. Intente nuevamente.",
+                icon: "error",
+            });
+        }
+    }; */
+
+    const handleEliminarPedido = async (pedidoId, mesaId) => {
+        // Verificamos que los datos sean correctos
+        console.log("Pedido ID:", pedidoId);
+        console.log("Mesa ID:", mesaId);
+    
+        // Validamos que mesaId esté presente
+        if (!mesaId) {
+            MySwal.fire({
+                title: "Error",
+                text: "Este pedido no tiene mesa asociada.",
+                icon: "error",
+            });
+            return;
+        }
+    
+        // Confirmación con SweetAlert
+        MySwal.fire({
+            title: "¿Estás seguro?",
+            text: "Una vez eliminado, no podrás recuperar este pedido y la mesa quedará disponible.",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Sí, eliminarlo",
+            cancelButtonText: "Cancelar",
+            reverseButtons: true,
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                try {
+                    // Llamamos a la API para marcar el pedido como borrado lógicamente
+                    await axios.put(`http://localhost:8085/api/v1/pedidos/${pedidoId}/borrar`);
+    
+                    // Actualizamos la disponibilidad de la mesa
+                    await axios.put(`http://localhost:8085/api/v1/mesas/${mesaId}/disponibilidad`, { disponibilidad: true });
+    
+                    // Eliminamos el pedido de la UI
+                    setPedidos(prevPedidos => prevPedidos.filter(pedido => pedido.id !== pedidoId));
+    
+                    // Mostramos un mensaje de éxito
+                    MySwal.fire({
+                        title: "Pedido Eliminado",
+                        text: "El pedido ha sido eliminado y la mesa está disponible.",
+                        icon: "success",
+                    });
+                } catch (error) {
+                    console.error("Error al marcar el pedido como borrado:", error);
+                    MySwal.fire({
+                        title: "Error",
+                        text: "Hubo un problema al eliminar el pedido. Intente nuevamente.",
+                        icon: "error",
+                    });
+                }
+            }
+        });
+    };
+    
+
+
+    const updateMesaDisponibilidad = async (mesaId, disponibilidad) => {
+        try {
+            await axios.put(`http://localhost:8085/api/v1/mesas/${mesaId}/disponibilidad`, {
+                disponibilidad: disponibilidad, // Solo se pasa el campo 'disponibilidad'
+            });
+        } catch (error) {
+            console.error("Error actualizando la disponibilidad de la mesa:", error);
+            MySwal.fire({
+                title: "Error",
+                text: "Hubo un problema al actualizar la disponibilidad de la mesa. Intente nuevamente.",
                 icon: "error",
             });
         }
     };
+
+
+
 
     return (
         <div className="container">
             <div className="card text-center">
                 <div className="card-header">Gestión de Pedidos</div>
             </div>
-            
+
             <Table striped bordered hover>
                 <thead>
                     <tr>
@@ -238,37 +285,43 @@ const DetallePedidoPrueba = () => {
                         </tr>
                     ) : (
                         rows.map((pedido) => (
-                            <tr key={pedido.id} onClick={() => handleRowSelect(pedido)}>
-                                <td>{pedido.id}</td>
-                                <td>
-                                    {pedido.pedidos.map((producto, index) => (
-                                        <div key={index}>
-                                            {producto.producto} (Cant: {producto.cantidad}) {producto.observacion}
-                                        </div>
-                                    ))}
-                                </td>
-                                <td>{pedido.destino}</td>
-                                <td>{pedido.estado}</td>
-                                <td>${pedido.total.toFixed().toLocaleString()}</td>
-                                <td>
-                                    <ButtonGroup>
-                                        <Button onClick={() => { window.location.href = `/detallepedido`; }}>
-                                            Agregar
-                                        </Button>
-                                        <Button variant="danger" onClick={(e) => {
-                                            e.stopPropagation(); // Prevent triggering row select
-                                            handleEliminarPedido(pedido.id);
-                                        }}>
-                                            Eliminar
-                                        </Button>
+                            // Solo mostramos pedidos que no estén marcados como borrados
+                            !pedido.borrado && (
+                                <tr key={pedido.id} onClick={() => handleRowSelect(pedido)}>
+                                    <td>{pedido.id}</td>
+                                    <td>
+                                        {pedido.pedidos.map((producto, index) => (
+                                            <div key={index}>
+                                                {producto.producto} (Cant: {producto.cantidad}) {producto.observacion}
+                                            </div>
+                                        ))}
+                                    </td>
+                                    <td>{pedido.destino}</td>
+                                    <td>{pedido.estado}</td>
+                                    <td>${pedido.total.toFixed().toLocaleString()}</td>
+                                    <td>
+                                        <ButtonGroup>
+                                            <Button onClick={() => { window.location.href = `/detallepedido`; }}>
+                                                Agregar
+                                            </Button>
+                                            <Button variant="danger" onClick={(e) => {
+                                                e.stopPropagation(); // Prevent triggering row select
+                                                const mesaId = pedido.destino; 
+                                                console.log(pedido.destino)// O ajusta según cómo se obtiene mesaId
+                                                handleEliminarPedido(pedido.id, mesaId);
 
-                                    </ButtonGroup>
-                                </td>
-                            </tr>
+                                            }}>
+                                                Eliminar
+                                            </Button>
+                                        </ButtonGroup>
+                                    </td>
+                                </tr>
+                            )
                         ))
                     )}
                 </tbody>
             </Table>
+
 
             <Modal show={show} onHide={handleClose}>
                 <Modal.Header closeButton>
@@ -302,7 +355,7 @@ const DetallePedidoPrueba = () => {
 };
 
 export default DetallePedidoPrueba;
- 
+
 
 
 
