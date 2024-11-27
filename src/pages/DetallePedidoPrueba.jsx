@@ -306,9 +306,10 @@ const DetallePedidoPrueba = () => {
                                             </Button>
                                             <Button variant="danger" onClick={(e) => {
                                                 e.stopPropagation(); // Prevent triggering row select
-                                                const mesaId = pedido.destino; 
-                                                console.log(pedido.destino)// O ajusta según cómo se obtiene mesaId
-                                                handleEliminarPedido(pedido.id, mesaId);
+                                                const mesaId = pedido.destino.match(/\d+/);
+                                                const numeroMesa = mesaId ? parseInt(mesaId[0], 10) : null; 
+                                                console.log(numeroMesa)// O ajusta según cómo se obtiene mesaId
+                                                handleEliminarPedido(pedido.id, numeroMesa);
 
                                             }}>
                                                 Eliminar
