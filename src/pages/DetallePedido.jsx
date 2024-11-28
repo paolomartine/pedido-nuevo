@@ -8,7 +8,7 @@ import { useNavigate } from "react-router-dom";
 
 const MySwal = withReactContent(Swal);
 
-const DetallePedidoPrueba = () => {
+const DetallePedido = () => {
     const [pedidos, setPedidos] = useState([]);
     const [rows, setRows] = useState([]);
     const [loadingProductos, setLoadingProductos] = useState(false);
@@ -24,14 +24,25 @@ const DetallePedidoPrueba = () => {
         const fetchPedidos = async () => {
             try {
                 const response = await axios.get("http://localhost:8085/api/v1/pedidos");
-                setPedidos(response.data);
+
+                // Filtramos los pedidos para que solo incluyan aquellos con estado "PEDIDO" 
+                // o aquellos que tienen el campo "borrado" igual a true
+                const filteredPedidos = response.data.filter(pedido => {
+                    const detallePedidosEnPedido = pedido.detallePedidos || [];
+                    const estadoDetallePedidos = detallePedidosEnPedido.some(detalle => detalle.estado === "PEDIDO");
+
+                    // Filtramos por estado "PEDIDO" o "borrado = true"
+                    return pedido.estado === "PEDIDO" && pedido.borrado === false || estadoDetallePedidos;
+                });
+
+                setPedidos(filteredPedidos);
             } catch (error) {
                 console.error("Error fetching pedidos:", error);
             }
         };
-
         fetchPedidos();
     }, []);
+
 
     useEffect(() => {
         const generateRows = async () => {
@@ -40,10 +51,12 @@ const DetallePedidoPrueba = () => {
                 pedidos.map(async (pedido) => {
                     const productosData = await fetchProductos(pedido.id);
                     const pedidosFormat = productosData.map((producto) => ({
+                        id: producto.id,
                         producto: producto.nombre,
                         cantidad: producto.cantidad,
                         observacion: producto.observacion,
                         estado: producto.estadoDetalle,
+                        selected: false,
                     }));
                     const total = productosData.reduce((sum, producto) => sum + (producto.precio * producto.cantidad), 0);
                     return {
@@ -58,7 +71,6 @@ const DetallePedidoPrueba = () => {
             setRows(rows);
             setLoadingProductos(false);
         };
-
         if (pedidos.length > 0) {
             generateRows();
         }
@@ -66,7 +78,7 @@ const DetallePedidoPrueba = () => {
 
     const fetchProductos = async (pedidoId) => {
         try {
-            const response = await axios.get(`http://localhost:8085/api/v1/detalepedidos/${pedidoId}/productos`);
+            const response = await axios.get(`http://localhost:8085/api/v1/detallepedidos/${pedidoId}/productos`);
             return response.data;
         } catch (error) {
             console.error("Error fetching productos:", error);
@@ -76,12 +88,18 @@ const DetallePedidoPrueba = () => {
 
     const handleRowSelect = (pedido) => {
         setSelectedRowsData([pedido]);
-        setShow(true);
         setSelectedPedido(pedido.pedidos);
+        setShow(true);
     };
 
-    const handleModalDespachar = async () => {
+
+
+    const handleModalDespacharPrueba = async () => {
         const pedidoId = selectedRowsData[0].id;
+        const mesaId = selectedRowsData[0].mesaId; // Obtener el mesaId desde el pedido seleccionado
+        console.log(mesaId);
+        console.log(pedidoId);
+
         try {
             // Obtener los datos del pedido actual
             const response = await axios.get(`http://localhost:8085/api/v1/pedidos/${pedidoId}`);
@@ -90,21 +108,109 @@ const DetallePedidoPrueba = () => {
             // Actualizar el estado del pedido a "DESPACHADO"
             const updatedPedido = {
                 ...pedidoData,
-                estado: 'DESPACHADO',
+                estado: 'DESPACHADO', // Cambiar el estado del pedido a "DESPACHADO"
             };
             await axios.put(`http://localhost:8085/api/v1/pedidos`, updatedPedido);
-
             handleClose();
-
+            navigate("/despachados");
         } catch (error) {
-            console.error("Error despachando productos:", error);
+            navigate("/pedidos");
+            console.error("Error procesando el despacho:", error);
+            MySwal.fire({
+                title: "Error",
+                text: "Ocurrió un problema al procesar el despacho. Intente nuevamente.",
+                icon: "error",
+            });
         }
-        navigate("/pedidos")
     };
+
+
+    const handleSelectProducto = (index) => {
+        const updatedPedido = [...selectedPedido];
+        updatedPedido[index].selected = !updatedPedido[index].selected;
+        setSelectedPedido(updatedPedido);
+    };
+
+    const handleEliminarPedido = async (pedidoId, mesaId) => {
+        // Verificamos que los datos sean correctos
+        console.log("Pedido ID:", pedidoId);
+        console.log("Mesa ID:", mesaId);
+
+        // Validamos que mesaId esté presente
+        if (!mesaId) {
+            MySwal.fire({
+                title: "Error",
+                text: "Este pedido no tiene mesa asociada.",
+                icon: "error",
+            });
+            return;
+        }
+
+        // Confirmación con SweetAlert
+        MySwal.fire({
+            title: "¿Estás seguro?",
+            text: "Una vez eliminado, no podrás recuperar este pedido y la mesa quedará disponible.",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Sí, eliminarlo",
+            cancelButtonText: "Cancelar",
+            reverseButtons: true,
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                try {
+                    // Llamamos a la API para marcar el pedido como borrado lógicamente
+                    await axios.put(`http://localhost:8085/api/v1/pedidos/${pedidoId}/borrar`);
+
+                    // Actualizamos la disponibilidad de la mesa
+                    await axios.put(`http://localhost:8085/api/v1/mesas/${mesaId}/disponibilidad`, { disponibilidad: true });
+
+                    // Eliminamos el pedido de la UI
+                    setPedidos(prevPedidos => prevPedidos.filter(pedido => pedido.id !== pedidoId));
+
+                    // Mostramos un mensaje de éxito
+                    MySwal.fire({
+                        title: "Pedido Eliminado",
+                        text: "El pedido ha sido eliminado y la mesa está disponible.",
+                        icon: "success",
+                    });
+                } catch (error) {
+                    console.error("Error al marcar el pedido como borrado:", error);
+                    MySwal.fire({
+                        title: "Error",
+                        text: "Hubo un problema al eliminar el pedido. Intente nuevamente.",
+                        icon: "error",
+                    });
+                }
+            }
+        });
+    };
+
+
+
+    const updateMesaDisponibilidad = async (mesaId, disponibilidad) => {
+        try {
+            await axios.put(`http://localhost:8085/api/v1/mesas/${mesaId}/disponibilidad`, {
+                disponibilidad: disponibilidad, // Solo se pasa el campo 'disponibilidad'
+            });
+        } catch (error) {
+            console.error("Error actualizando la disponibilidad de la mesa:", error);
+            MySwal.fire({
+                title: "Error",
+                text: "Hubo un problema al actualizar la disponibilidad de la mesa. Intente nuevamente.",
+                icon: "error",
+            });
+        }
+    };
+
+
+
 
     return (
         <div className="container">
-            <h2>Detalles de Pedidos</h2>
+            <div className="card text-center">
+                <div className="card-header">Gestión de Pedidos</div>
+            </div>
+
             <Table striped bordered hover>
                 <thead>
                     <tr>
@@ -123,36 +229,44 @@ const DetallePedidoPrueba = () => {
                         </tr>
                     ) : (
                         rows.map((pedido) => (
-                            <tr key={pedido.id} onClick={() => handleRowSelect(pedido)}>
-                                <td>{pedido.id}</td>
-                                <td>
-                                    {pedido.pedidos.map((producto, index) => (
-                                        <div key={index}>
-                                            {producto.producto} (Cantidad: {producto.cantidad})
-                                        </div>
-                                    ))}
-                                </td>
-                                <td>{pedido.destino}</td>
-                                <td>{pedido.estado}</td>
-                                <td>${pedido.total.toFixed(2)}</td>
-                                <td>
-                                    <ButtonGroup>
-                                        <Button 
-                                            variant="primary" 
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                handleShow();
-                                            }} 
-                                        >
-                                            Despachar
-                                        </Button>
-                                    </ButtonGroup>
-                                </td>
-                            </tr>
+                            // Solo mostramos pedidos que no estén marcados como borrados
+                            !pedido.borrado && (
+                                <tr key={pedido.id} onClick={() => handleRowSelect(pedido)}>
+                                    <td>{pedido.id}</td>
+                                    <td>
+                                        {pedido.pedidos.map((producto, index) => (
+                                            <div key={index}>
+                                                {producto.producto} (Cant: {producto.cantidad}) {producto.observacion}
+                                            </div>
+                                        ))}
+                                    </td>
+                                    <td>{pedido.destino}</td>
+                                    <td>{pedido.estado}</td>
+                                    <td>${pedido.total.toFixed().toLocaleString()}</td>
+                                    <td>
+                                        <ButtonGroup>
+                                            <Button onClick={() => { window.location.href = `/detallepedido`; }}>
+                                                Agregar
+                                            </Button>
+                                            <Button variant="danger" onClick={(e) => {
+                                                e.stopPropagation(); // Prevent triggering row select
+                                                const mesaId = pedido.destino.match(/\d+/);
+                                                const numeroMesa = mesaId ? parseInt(mesaId[0], 10) : null;
+                                                console.log(numeroMesa)// O ajusta según cómo se obtiene mesaId
+                                                handleEliminarPedido(pedido.id, numeroMesa);
+
+                                            }}>
+                                                Eliminar
+                                            </Button>
+                                        </ButtonGroup>
+                                    </td>
+                                </tr>
+                            )
                         ))
                     )}
                 </tbody>
             </Table>
+
 
             <Modal show={show} onHide={handleClose}>
                 <Modal.Header closeButton>
@@ -162,7 +276,12 @@ const DetallePedidoPrueba = () => {
                     <ListGroup>
                         {selectedPedido.map((producto, index) => (
                             <ListGroup.Item key={index}>
-                                {producto.producto} (Cantidad: {producto.cantidad})
+                                <input
+                                    type="checkbox"
+                                    checked={producto.selected || false}
+                                    onChange={() => handleSelectProducto(index)}
+                                />
+                                {producto.descripcion} {producto.producto} (Cantidad: {producto.cantidad})
                             </ListGroup.Item>
                         ))}
                     </ListGroup>
@@ -171,7 +290,7 @@ const DetallePedidoPrueba = () => {
                     <Button variant="secondary" onClick={handleClose}>
                         Cerrar
                     </Button>
-                    <Button variant="primary" onClick={handleModalDespachar}>
+                    <Button variant="primary" onClick={handleModalDespacharPrueba}>
                         Despachar
                     </Button>
                 </Modal.Footer>
@@ -180,4 +299,8 @@ const DetallePedidoPrueba = () => {
     );
 };
 
-export default DetallePedidoPrueba;
+export default DetallePedido;
+
+
+
+

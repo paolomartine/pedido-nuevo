@@ -7,7 +7,7 @@ import Table from '../pages/Table'
 import User from '../pages/User'
 import Edit from '../pages/Edit'
 
-import DetallePedido from '../pages/DetallePedido';
+
 import Detail from '../pages/Detail';
 
 import DomicilioForm from '../pages/DomicilioForm';
@@ -18,7 +18,7 @@ import Ventas from '../pages/Ventas';
 import OrderFormDom from '../pages/OrderFormDom';
 import DetallePedidoDom from '../pages/DetallePedidoDom';
 import DomiciliosDespachados from '../pages/DomiciliosDespachados';
-import DetallePedidoPrueba from '../pages/DetallePedidoPrueba';
+import DetallePedido from '../pages/DetallePedido';
 
 const Routers = () => {
   return <Routes>
@@ -27,9 +27,8 @@ const Routers = () => {
     <Route path="/menu" element={<Menu />} />      
     <Route path="/mesas" element={<Table />} />
     <Route path="/editar" element={<Edit />} />
-    <Route path="/clientes" element={<User />} />        
-    {/* <Route path="/pedidos" element={<DetallePedido />} />    */}
-    <Route path="/pedidos" element={<DetallePedidoPrueba />} />        
+    <Route path="/clientes" element={<User />} />      
+    <Route path="/pedidos" element={<DetallePedido />} />        
     <Route path="/domicilios" element={<DomicilioForm />} /> 
     <Route path="/detallepedido" element={<OrderForm />} />
     <Route path="/detallepedidodom" element={<OrderFormDom />} />
