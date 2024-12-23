@@ -2,9 +2,8 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
-import { Typography, Stack, Box, Modal, List, ListItem, ListItemText, Checkbox } from '@mui/material';
+import { Button, Stack, Modal, ListGroup, ListGroupItem, Table } from 'react-bootstrap'; // Usamos Bootstrap en lugar de Material UI
 import Swal from 'sweetalert2';
-import { Button } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 // Definir las columnas del DataGrid
@@ -18,9 +17,7 @@ const columns = [
             <div>
                 {params.row.pedidos.map((pedido, index) => (
                     <span key={index}>
-                        <Typography noWrap>
-                            {pedido.producto} ({pedido.cantidad})
-                        </Typography>
+                        <p>{pedido.producto} ({pedido.cantidad})</p> {/* Usamos <p> en lugar de <Typography> */}
                     </span>
                 ))}
             </div>
@@ -30,19 +27,6 @@ const columns = [
     { field: 'estado', headerName: 'Estado', width: 210 },
     { field: 'total', headerName: 'Total', type: 'number', width: 120 },
 ];
-
-// Estilos para el modal
-const modalStyle = {
-    position: 'absolute',
-    top: '50%',
-    left: '50%',
-    transform: 'translate(-50%, -50%)',
-    width: 400,
-    bgcolor: 'background.paper',
-    border: '2px solid #000',
-    boxShadow: 24,
-    p: 4,
-};
 
 const Ventas = () => {
     const [pedidos, setPedidos] = useState([]);
@@ -150,10 +134,9 @@ const Ventas = () => {
         });
     
         doc.save('reporte_ventas.pdf');
-      };
+    };
 
-
-      const generatePDFIndividual = async (pedidoId) => {
+    const generatePDFIndividual = async (pedidoId) => {
         const doc = new jsPDF();
     
         doc.text(`Reporte de Pedido: ${pedidoId}`, 10, 10);
@@ -173,32 +156,57 @@ const Ventas = () => {
         doc.autoTable(tableColumn, tableRows, { startY: 30 });
     
         doc.save(`reporte_pedido_${pedidoId}.pdf`);
-
-
-}
+    };
 
     return (
-        <div style={{ height: 250, width: '80%', marginLeft: '10%', marginTop: '2%', marginBottom: '10%' }}>
-            <Typography variant="h6" gutterBottom>
-                Ventas
-            </Typography>
-            <Typography variant="h6" gutterBottom>
-                Total de ventas: {ventaTotal}
-            </Typography>
-            <Typography variant="h6" gutterBottom>
-                Ventas por Producto:
-            </Typography>
-            {Object.keys(ventasPorProducto).map((producto) => (
-                <Typography key={producto} variant="body1" gutterBottom>
-                    {producto}: {ventasPorProducto[producto]}
-                </Typography>
-            ))}
-            <Button className="btn btn-primary" variant="contained" color="primary" onClick={generatePDF}>
-                Reporte PDF
-            </Button>
-            <Button className="btn btn-primary" variant="contained" color="primary" onClick={generatePDFIndividual}>
-                Factura electrónica
-            </Button>
+        <div style={{ width: '80%', margin: 'auto', marginTop: '2%', marginBottom: '10%' }}>
+            <h4>Ventas</h4>
+            <h5>Total de ventas: {ventaTotal}</h5>
+            <h5>Ventas por Producto:</h5>
+            <ListGroup>
+                {Object.keys(ventasPorProducto).map((producto) => (
+                    <ListGroupItem key={producto}>
+                        {producto}: {ventasPorProducto[producto]}
+                    </ListGroupItem>
+                ))}
+            </ListGroup>
+
+            <h5 className="mt-4">Pedidos:</h5>
+            <Table striped bordered hover>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Pedidos</th>
+                        <th>Destino</th>
+                        <th>Estado</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {rows.map((row) => (
+                        <tr key={row.id}>
+                            <td>{row.id}</td>
+                            <td>
+                                {row.pedidos.map((pedido, index) => (
+                                    <p key={index}>{pedido.producto} ({pedido.cantidad})</p>
+                                ))}
+                            </td>
+                            <td>{row.destino}</td>
+                            <td>{row.estado}</td>
+                            <td>{row.total}</td>
+                        </tr>
+                    ))}
+                </tbody>
+            </Table>
+
+            <div className="mt-3">
+                <Button variant="primary" onClick={generatePDF} className="me-2">
+                    Reporte PDF
+                </Button>
+                <Button variant="primary" onClick={generatePDFIndividual}>
+                    Factura electrónica
+                </Button>
+            </div>
         </div>
     );
 };

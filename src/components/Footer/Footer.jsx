@@ -20,7 +20,7 @@ const Footer = () => {
           </div>
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <WhatsAppIcon style={{ marginRight: '10px' }} />
-            <p style={{ fontFamily: 'Arial', fontSize: '16px', fontWeight: 'bold', margin: 0 }}>WhatsApp: 3117647840</p>
+            <p style={{ fontFamily: 'Arial', fontSize: '16px', fontWeight: 'bold', margin: 0 }}>WhatsApp: 3113939122</p>
           </div>
         </div>
       </div>

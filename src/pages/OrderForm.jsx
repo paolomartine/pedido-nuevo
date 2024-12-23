@@ -15,7 +15,7 @@ const OrderForm = () => {
         producto: null,
         cantidad: 0,
         observacion: "",
-        estadoDetalle: '0'
+        estado_detalle: '0'
     });
 
     const navigate = useNavigate();
@@ -53,14 +53,14 @@ const OrderForm = () => {
         const id_producto = formData.producto
         const cantidad = formData.cantidad
         const observacion = formData.observacion
-        const estadoDetalle = formData.estadoDetalle
+        const estado_detalle = formData.estado_detalle
         try {
             const response = await axios.post('http://localhost:8085/api/v1/detallepedidos', {
                 id_pedido,
                 id_producto,
                 cantidad,
                 observacion,
-                estadoDetalle,
+                estado_detalle,
             });
             MySwal.fire({
                 title: "¿Quiéres pedir algo más?",
@@ -110,7 +110,7 @@ const OrderForm = () => {
             producto: null,
             cantidad: 0,
             observacion: "",
-            estadoDetalle: '0'
+            estado_detalle: '0'
         });
     };
 
@@ -120,7 +120,7 @@ const OrderForm = () => {
             producto: null,
             cantidad: 0,
             observacion: "",
-            estadoDetalle: '0'
+            estado_detalle: '0'
         });
     };
 
@@ -196,14 +196,14 @@ const OrderForm = () => {
                                 onChange={handleChange}
                             /> </div>
                         <div className="mb-3">
-                            <label htmlFor="estadoDetalle" className="form-label">
-                                EstadoDetalle
+                            <label htmlFor="estado_detalle" className="form-label">
+                                Estado del producto
                             </label>
                             <select
-                                id="estadoDetalle"
-                                name="estadoDetalle"
+                                id="estado_detalle"
+                                name="estado_detalle"
                                 className="form-select"
-                                value={formData.estadoDetalle}
+                                value={formData.estado_detalle}
                                 onChange={handleChange}
                                 required >
                                 <option value={0}>Pedido</option>
